@@ -24,7 +24,7 @@ private:
     Ui::PopupClockClass ui;
 	QPoint last_mouse_position_;
 	QSystemTrayIcon* mSysTrayIcon;
-	int m_x = 0;
+	int m_x = 250;
 	QString pre_min;
 	QString cur_min;
 	QString pre_min2;

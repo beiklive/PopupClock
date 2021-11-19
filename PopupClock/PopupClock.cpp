@@ -5,9 +5,10 @@ PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
+
 	m_x = 0 - this->width();
 	this->move(QPoint(m_x, 50));
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
@@ -16,11 +17,11 @@ PopupClock::PopupClock(QWidget *parent)
 	//新建QSystemTrayIcon对象
 	mSysTrayIcon = new QSystemTrayIcon(this);
 	//新建托盘要显示的icon
-	QIcon icon = QIcon("DDJ.ico");
+	QIcon icon = QIcon(":/PopupClock/DDJ.ico");
 	//将icon设到QSystemTrayIcon对象中
 	mSysTrayIcon->setIcon(icon);
 	//当鼠标移动到托盘上的图标时，会显示此处设置的内容
-	mSysTrayIcon->setToolTip(QString::fromUtf8("超级小桀的时钟"));
+	mSysTrayIcon->setToolTip(QString::fromUtf8("PopUpClock"));
 	//在系统托盘显示此对象
 	mSysTrayIcon->show();
 
