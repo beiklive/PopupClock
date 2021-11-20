@@ -57,7 +57,7 @@ void PopupClock::SetNumClock()
 		}
 	}
 
-	if (min == chargeMin1 + 1 || min == chargeMin2 + 1) {
+	if (min == chargeMin1 + 1 || min == (chargeMin2 + 1)%60) {
 		if (sec == chargeSec)
 		{
 			MoveClockback();
