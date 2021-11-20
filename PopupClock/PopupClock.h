@@ -25,7 +25,7 @@ private:
 	QPoint last_mouse_position_;
 	QSystemTrayIcon* mSysTrayIcon;
 	int m_x = 250;
-	int chargeMin = 30;
+	int chargeMin = 29;
 	int chargeSec = 30;
 
 public slots:
