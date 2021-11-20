@@ -50,14 +50,14 @@ void PopupClock::SetNumClock()
 	int min = time.toString("mm").toInt();
 	int sec = time.toString("ss").toInt();
 	
-	if ( min == chargeMin) {
+	if ( min == chargeMin1 || min == chargeMin2) {
 		if (sec == chargeSec)
 		{
 			MoveClock();
 		}
 	}
 
-	if (min == chargeMin+1) {
+	if (min == chargeMin1 + 1 || min == chargeMin2 + 1) {
 		if (sec == chargeSec)
 		{
 			MoveClockback();
