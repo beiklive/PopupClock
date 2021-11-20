@@ -25,10 +25,8 @@ private:
 	QPoint last_mouse_position_;
 	QSystemTrayIcon* mSysTrayIcon;
 	int m_x = 250;
-	QString pre_min;
-	QString cur_min;
-	QString pre_min2;
-	QString cur_min2;
+	int chargeMin = 30;
+	int chargeSec = 30;
 
 public slots:
 	void SetNumClock();
