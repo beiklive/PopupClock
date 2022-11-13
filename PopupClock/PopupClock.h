@@ -10,6 +10,9 @@
 #include <QSystemTrayIcon>
 #include "DrawClock.h"
 #include <QPropertyAnimation>
+#include <QFileInfo>
+#include <QSettings>
+#include <QDir>
 class PopupClock : public QWidget
 {
     Q_OBJECT
@@ -20,6 +23,9 @@ public:
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
+
+private:
+	bool checkAutoStart();
 private:
     Ui::PopupClockClass ui;
 	QPoint last_mouse_position_;
@@ -29,8 +35,12 @@ private:
 	int chargeMin2 = 59;
 	int chargeSec = 30;
 
+	QAction* m_pActionAutoStart;
+	QAction* m_pActionExit;
+
 public slots:
 	void SetNumClock();
 	void MoveClock();
 	void MoveClockback();
+	void SetAutoStart(bool flag);
 };

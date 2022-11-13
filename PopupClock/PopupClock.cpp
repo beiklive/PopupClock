@@ -1,7 +1,9 @@
-#pragma execution_character_set("utf-8")
 #include "PopupClock.h"
 #include <QSystemTrayIcon>
 #include <QIcon>
+#pragma execution_character_set("utf-8")
+#define AUTO_RUN "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+
 PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
 {
@@ -26,16 +28,23 @@ PopupClock::PopupClock(QWidget *parent)
 	//将icon设到QSystemTrayIcon对象中
 	mSysTrayIcon->setIcon(icon);
 	//当鼠标移动到托盘上的图标时，会显示此处设置的内容
-	mSysTrayIcon->setToolTip("超级小桀的时钟");
+	mSysTrayIcon->setToolTip(QString::fromLocal8Bit("桀哥的时钟"));
 	//在系统托盘显示此对象
 	mSysTrayIcon->show();
 
-
 	auto m_menu = new QMenu(this);
-	auto m_action2 = new QAction(m_menu);
-	m_action2->setText("Exit");
-	m_menu->addAction(m_action2); 
- 	connect(m_action2, &QAction::triggered, this, &QApplication::quit);
+	
+	m_pActionAutoStart = new QAction(m_menu);
+	m_pActionAutoStart->setText(QString::fromLocal8Bit("开机自启"));
+	m_pActionAutoStart->setCheckable(true);
+	m_pActionAutoStart->setChecked(checkAutoStart());
+	connect(m_pActionAutoStart, &QAction::triggered, this, &PopupClock::SetAutoStart);
+	m_menu->addAction(m_pActionAutoStart);
+	
+	m_pActionExit = new QAction(m_menu);
+	m_pActionExit->setText(QString::fromLocal8Bit("离开"));
+	m_menu->addAction(m_pActionExit);
+	connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
 	mSysTrayIcon->setContextMenu(m_menu);
 }
 
@@ -65,9 +74,35 @@ void PopupClock::SetNumClock()
 	}
 }
 
+void PopupClock::SetAutoStart(bool flag) {
+	QSettings settings(AUTO_RUN, QSettings::NativeFormat);
 
+	//以程序名称作为注册表中的键,根据键获取对应的值（程序路径）
+	QFileInfo fInfo(QApplication::applicationFilePath());
+	QString name = fInfo.baseName();    //键-名称
 
+	//如果注册表中的路径和当前程序路径不一样，则表示没有设置自启动或本自启动程序已经更换了路径
+	QString oldPath = settings.value(name).toString(); //获取目前的值-绝对路经
+	QString newPath = QDir::toNativeSeparators(QApplication::applicationFilePath());    //toNativeSeparators函数将"/"替换为"\"
+	if (flag)
+	{
+		if (oldPath != newPath)
+			settings.setValue(name, newPath);
+	}
+	else {
+		settings.remove(name);
+	}
+	m_pActionAutoStart->setChecked(checkAutoStart());
+}
 
+bool PopupClock::checkAutoStart() {
+	QSettings settings(AUTO_RUN, QSettings::NativeFormat);
+	QFileInfo fInfo(QApplication::applicationFilePath());
+	QString name = fInfo.baseName();
+	QString oldPath = settings.value(name).toString();
+	QString newPath = QDir::toNativeSeparators(QApplication::applicationFilePath());
+	return (settings.contains(name) && newPath == oldPath);
+}
 
 void PopupClock::MoveClock() {
 	auto width = this->width();
