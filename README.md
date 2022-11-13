@@ -1,7 +1,7 @@
 # PopupClock
 仿超级小桀的时钟
 
-![Alt](img/8f909ccbea090049c56d63c46e847bc678b7a403.svg+xml "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/8f909ccbea090049c56d63c46e847bc678b7a403.svg "Repobeats analytics image")
 
 
 
