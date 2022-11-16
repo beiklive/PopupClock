@@ -1,23 +1,32 @@
 #ifndef GEN_H
 #define GEN_H
 
-#include <QWidget>
+#include <QObject>
+#include <QTimer>
+#include <QMouseEvent>
+#include <QTime>
+#include <QAction>
+#include <QMenu>
+#include <QSystemTrayIcon>
+#include <QPropertyAnimation>
+#include <QFileInfo>
+#include <QSettings>
+#include <QDir>
+#include <QList>
 #include "PopupClock.h"
 #include "sets.h"
-namespace Ui {
-class gen;
-}
 
-class gen : public QWidget
+
+class gen : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit gen(QWidget *parent = nullptr);
+    explicit gen();
     ~gen();
 
 private:
-    Ui::gen *ui;
+
     PopupClock *clock;
     Sets settingUI;
 

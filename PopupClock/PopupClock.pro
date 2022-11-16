@@ -33,5 +33,4 @@ RESOURCES += \
 
 FORMS += \
     PopupClock.ui \
-    gen.ui \
     sets.ui

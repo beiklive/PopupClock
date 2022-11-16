@@ -117,14 +117,15 @@ void PopupClock::SetNumClock()
 void PopupClock::MoveClock() {
     isPop = true;
 
-    QPropertyAnimation* m_pAnimation;
-    m_pAnimation = new QPropertyAnimation(this, "pos");
+    QPropertyAnimation* m_pAnimation =&m_Animation0;
+    m_pAnimation->setTargetObject(this);     //重设动画使用对象
+    m_pAnimation->setPropertyName("pos");  //指定动画属性名
     m_pAnimation->setDuration(moveSpeed);//设置移动时间
     m_pAnimation->setStartValue(QPoint(m_x - moveStep, m_y));//开始位置
     m_pAnimation->setEndValue(QPoint(m_x, m_y));//结束位置
 	m_pAnimation->start();//开始移动
 
-    QPropertyAnimation* m_pAnimation2 = new QPropertyAnimation();;
+    QPropertyAnimation* m_pAnimation2 = &m_Animation1;
     m_pAnimation2->setTargetObject(this);     //重设动画使用对象
     m_pAnimation2->setPropertyName("windowOpacity");  //指定动画属性名
     m_pAnimation2->setDuration(moveSpeed);     //设置动画时间（单位：毫秒）
@@ -136,14 +137,14 @@ void PopupClock::MoveClock() {
 
 void PopupClock::MoveClockback() {
     isPop = false;
-
-    QPropertyAnimation* m_pAnimation;
-    m_pAnimation = new QPropertyAnimation(this, "pos");
-    m_pAnimation->setDuration(moveSpeed);//设置移动时间
-    m_pAnimation->setStartValue(QPoint(m_x, m_y));//开始位置
-    m_pAnimation->setEndValue(QPoint(m_x - moveStep, m_y));//结束位置
+    QPropertyAnimation* m_pAnimation =&m_Animation0;
+    m_pAnimation->setTargetObject(this);
+    m_pAnimation->setPropertyName("pos");
+    m_pAnimation->setDuration(moveSpeed);
+    m_pAnimation->setStartValue(QPoint(m_x, m_y));
+    m_pAnimation->setEndValue(QPoint(m_x - moveStep, m_y));
 	m_pAnimation->start();//开始移动
-    QPropertyAnimation* m_pAnimation2 = new QPropertyAnimation();;
+    QPropertyAnimation* m_pAnimation2 = &m_Animation1;
     m_pAnimation2->setTargetObject(this);     //重设动画使用对象
     m_pAnimation2->setPropertyName("windowOpacity");  //指定动画属性名
     m_pAnimation2->setDuration(moveSpeed);     //设置动画时间（单位：毫秒）

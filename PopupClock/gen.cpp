@@ -1,13 +1,9 @@
 #include "gen.h"
-#include "ui_gen.h"
 #pragma execution_character_set("utf-8")
 
-gen::gen(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::gen)
+gen::gen()
 {
-//    ui->setupUi(this);
-    this->hide();
+//    this->hide();
 
     //新建QSystemTrayIcon对象
     mSysTrayIcon = new QSystemTrayIcon(this);
@@ -20,7 +16,7 @@ gen::gen(QWidget *parent) :
     //在系统托盘显示此对象
     mSysTrayIcon->show();
 
-    auto m_menu = new QMenu(this);
+    auto m_menu = new QMenu();
 
     m_pActionAutoStart = new QAction(m_menu);
     m_pActionAutoStart->setText(("设置"));
@@ -32,14 +28,13 @@ gen::gen(QWidget *parent) :
     m_menu->addAction(m_pActionExit);
     connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
     mSysTrayIcon->setContextMenu(m_menu);
-    clock = new PopupClock(this);
+    clock = new PopupClock();
     clock->show();
     settingUI.GetParent(clock);
 }
 
 gen::~gen()
 {
-    delete ui;
 }
 
 void gen::ShowSetting()

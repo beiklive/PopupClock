@@ -53,7 +53,8 @@ private:
     QList<QString> *WeekList{nullptr};
 
     bool animateActive = false;
-
+    QPropertyAnimation m_Animation0{this};
+    QPropertyAnimation m_Animation1{this};
 
 public slots:
 	void SetNumClock();
