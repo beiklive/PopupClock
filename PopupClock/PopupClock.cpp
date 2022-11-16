@@ -1,16 +1,19 @@
 #include "PopupClock.h"
 #include <QSystemTrayIcon>
 #include <QIcon>
+#include <QDebug>
 #pragma execution_character_set("utf-8")
-#define AUTO_RUN "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+
+
+
+
+
 
 PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-
-	m_x = 0 - this->width();
-	this->move(QPoint(m_x, 50));
+    this->move(QPoint(m_x, m_y));
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
 
@@ -20,114 +23,143 @@ PopupClock::PopupClock(QWidget *parent)
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
     timer->start(1000);
-	
-	//新建QSystemTrayIcon对象
-	mSysTrayIcon = new QSystemTrayIcon(this);
-	//新建托盘要显示的icon
-	QIcon icon = QIcon(":/PopupClock/DDJ.png");
-	//将icon设到QSystemTrayIcon对象中
-	mSysTrayIcon->setIcon(icon);
-	//当鼠标移动到托盘上的图标时，会显示此处设置的内容
-	mSysTrayIcon->setToolTip(QString::fromLocal8Bit("桀哥的时钟"));
-	//在系统托盘显示此对象
-	mSysTrayIcon->show();
-
-	auto m_menu = new QMenu(this);
-	
-	m_pActionAutoStart = new QAction(m_menu);
-	m_pActionAutoStart->setText(QString::fromLocal8Bit("开机自启"));
-	m_pActionAutoStart->setCheckable(true);
-	m_pActionAutoStart->setChecked(checkAutoStart());
-	connect(m_pActionAutoStart, &QAction::triggered, this, &PopupClock::SetAutoStart);
-	m_menu->addAction(m_pActionAutoStart);
-	
-	m_pActionExit = new QAction(m_menu);
-	m_pActionExit->setText(QString::fromLocal8Bit("离开"));
-	m_menu->addAction(m_pActionExit);
-	connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
-	mSysTrayIcon->setContextMenu(m_menu);
+    MoveClockback();
 }
 
+void PopupClock::SetClockStatus(bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W)
+{
+    AnimateCtrl(active);
+    moveSpeed = speed;
+    keepTime = ktime;
+    if(SecondList != nullptr)
+    {
+        delete SecondList;
+        delete MinuteList;
+        delete HourList;
+        delete WeekList;
+    }
+    SecondList = S;
+    MinuteList = M;
+    HourList = H;
+    WeekList = W;
+//    qDebug() << "set update";
+//    qDebug() << *SecondList;
+//    qDebug() << *MinuteList;
+//    qDebug() << *HourList;
+//    qDebug() << *WeekList;
+//    qDebug() << "set update";
+}
 
+void PopupClock::AnimateCtrl(bool active)
+{
+//    qDebug() << "AnimateCtrl update";
+    animateActive = active;
+}
 
 void PopupClock::SetNumClock()
 {
     QTime time = QTime::currentTime();
     QString txtTime = time.toString("hh:mm:ss");
+
     ui.lcdNumber->display(txtTime);
 
-	int min = time.toString("mm").toInt();
-	int sec = time.toString("ss").toInt();
-	
-	if ( min == chargeMin1 || min == chargeMin2) {
-		if (sec == chargeSec)
-		{
-			MoveClock();
-		}
-	}
 
-	if (min == chargeMin1 + 1 || min == (chargeMin2 + 1)%60) {
-		if (sec == chargeSec)
-		{
-			MoveClockback();
-		}
-	}
+    if(animateActive && WeekList != nullptr){
+        QDateTime current_date_time = QDateTime::currentDateTime();
+        int curtime = current_date_time.toSecsSinceEpoch();
+        QString current_week = current_date_time.toString("dddd");
+        QString current_hour = current_date_time.toString("hh");
+        QString current_minute = current_date_time.toString("mm");
+        QString current_second = current_date_time.toString("ss");
+
+        for (auto k = WeekList->begin(); k != WeekList->end(); k++)
+        {
+
+            if(current_week != findWeekDayName((*k).toInt()))
+                continue;
+            for (auto j = HourList->begin(); j != HourList->end(); j++)
+            {
+
+                if(current_hour != *j)
+                    continue;
+
+                for (auto l = MinuteList->begin(); l != MinuteList->end(); l++)
+                {
+                    if(current_minute != *l)
+                        continue;
+                    for (auto i = SecondList->begin(); i != SecondList->end(); i++)
+                    {
+
+                        if(current_second == *i)
+                        {
+//                            qDebug() << "current_second " << current_second;
+                            MoveClock();
+                            finishTime = curtime + keepTime;
+                            break;
+                        }
+
+                    }
+                }
+            }
+        }
+        if(curtime == finishTime){
+            MoveClockback();
+        }
+//        qDebug() << "animate update";
+    }
+
 }
 
-void PopupClock::SetAutoStart(bool flag) {
-	QSettings settings(AUTO_RUN, QSettings::NativeFormat);
 
-	//以程序名称作为注册表中的键,根据键获取对应的值（程序路径）
-	QFileInfo fInfo(QApplication::applicationFilePath());
-	QString name = fInfo.baseName();    //键-名称
 
-	//如果注册表中的路径和当前程序路径不一样，则表示没有设置自启动或本自启动程序已经更换了路径
-	QString oldPath = settings.value(name).toString(); //获取目前的值-绝对路经
-	QString newPath = QDir::toNativeSeparators(QApplication::applicationFilePath());    //toNativeSeparators函数将"/"替换为"\"
-	if (flag)
-	{
-		if (oldPath != newPath)
-			settings.setValue(name, newPath);
-	}
-	else {
-		settings.remove(name);
-	}
-	m_pActionAutoStart->setChecked(checkAutoStart());
-}
 
-bool PopupClock::checkAutoStart() {
-	QSettings settings(AUTO_RUN, QSettings::NativeFormat);
-	QFileInfo fInfo(QApplication::applicationFilePath());
-	QString name = fInfo.baseName();
-	QString oldPath = settings.value(name).toString();
-	QString newPath = QDir::toNativeSeparators(QApplication::applicationFilePath());
-	return (settings.contains(name) && newPath == oldPath);
-}
 
 void PopupClock::MoveClock() {
-	auto width = this->width();
-	QPropertyAnimation* m_pAnimation;
-	m_pAnimation = new QPropertyAnimation(this, "pos");
-	m_pAnimation->setDuration(1500);//设置移动时间
-	m_pAnimation->setStartValue(QPoint(m_x, 50));//开始位置
-	m_pAnimation->setEndValue(QPoint(m_x + width, 50));//结束位置 
+    isPop = true;
+
+    QPropertyAnimation* m_pAnimation;
+    m_pAnimation = new QPropertyAnimation(this, "pos");
+    m_pAnimation->setDuration(moveSpeed);//设置移动时间
+    m_pAnimation->setStartValue(QPoint(m_x - moveStep, m_y));//开始位置
+    m_pAnimation->setEndValue(QPoint(m_x, m_y));//结束位置
 	m_pAnimation->start();//开始移动
 
+    QPropertyAnimation* m_pAnimation2 = new QPropertyAnimation();;
+    m_pAnimation2->setTargetObject(this);     //重设动画使用对象
+    m_pAnimation2->setPropertyName("windowOpacity");  //指定动画属性名
+    m_pAnimation2->setDuration(moveSpeed);     //设置动画时间（单位：毫秒）
+    m_pAnimation2->setKeyValueAt(0, 0);
+    m_pAnimation2->setKeyValueAt(0.5, 1);
+    m_pAnimation2->setKeyValueAt(1, 1);
+    m_pAnimation2->start();   //启动动画
 }
 
 void PopupClock::MoveClockback() {
-	auto width = this->width();
-	QPropertyAnimation* m_pAnimation;
-	m_pAnimation = new QPropertyAnimation(this, "pos");
-	m_pAnimation->setDuration(1500);//设置移动时间
-	m_pAnimation->setStartValue(QPoint(m_x + width, 50));//开始位置
-	m_pAnimation->setEndValue(QPoint(m_x, 50));//结束位置 
+    isPop = false;
+
+    QPropertyAnimation* m_pAnimation;
+    m_pAnimation = new QPropertyAnimation(this, "pos");
+    m_pAnimation->setDuration(moveSpeed);//设置移动时间
+    m_pAnimation->setStartValue(QPoint(m_x, m_y));//开始位置
+    m_pAnimation->setEndValue(QPoint(m_x - moveStep, m_y));//结束位置
 	m_pAnimation->start();//开始移动
+    QPropertyAnimation* m_pAnimation2 = new QPropertyAnimation();;
+    m_pAnimation2->setTargetObject(this);     //重设动画使用对象
+    m_pAnimation2->setPropertyName("windowOpacity");  //指定动画属性名
+    m_pAnimation2->setDuration(moveSpeed);     //设置动画时间（单位：毫秒）
+    m_pAnimation2->setKeyValueAt(0, 1);
+    m_pAnimation2->setKeyValueAt(0.5, 1);
+    m_pAnimation2->setKeyValueAt(1, 0);
+    m_pAnimation2->start();   //启动动画
+
 }
 void PopupClock::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() == Qt::LeftButton)
+    if (event->button() == Qt::LeftButton){
+        tempState = animateActive;
+        animateActive = false;
 		last_mouse_position_ = event->globalPos();
+    }
 }
 
 void PopupClock::mouseMoveEvent(QMouseEvent* event)
@@ -137,4 +169,29 @@ void PopupClock::mouseMoveEvent(QMouseEvent* event)
 	const QPoint position = pos() + event->globalPos() - last_mouse_position_;
 	move(position.x(), position.y());
 	last_mouse_position_ = event->globalPos();
+
+//    qDebug() << this->pos();
+}
+
+void PopupClock::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)    // Left button...
+    {
+        animateActive = tempState;
+        if(isPop){
+//            finishTime = 0;
+            m_x = this->pos().x();
+            m_y = this->pos().y();
+//            MoveClockback();
+        }else{
+            m_x = this->pos().x() + moveStep;
+            m_y = this->pos().y();
+        }
+
+    }
+}
+
+QString PopupClock::findWeekDayName(int index)
+{
+    return Weeks[index];
 }

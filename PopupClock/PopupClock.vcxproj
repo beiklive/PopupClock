@@ -58,6 +58,18 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PostBuildEvent>
+      <Command>editbin /SUBSYSTEM:CONSOLE $(outdir)$(ProjectName).exe
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PostBuildEvent>
+      <Command>editbin /SUBSYSTEM:CONSOLE $(outdir)$(ProjectName).exe
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -85,18 +97,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Settings.cpp" />
     <QtRcc Include="PopupClock.qrc" />
     <QtUic Include="PopupClock.ui" />
     <QtMoc Include="PopupClock.h" />
     <ClCompile Include="DrawClock.cpp" />
     <ClCompile Include="PopupClock.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="Setting.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="DrawClock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <QtMoc Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PopupClock.rc" />
