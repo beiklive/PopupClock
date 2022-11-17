@@ -3,17 +3,11 @@
 
 gen::gen()
 {
-//    this->hide();
 
-    //新建QSystemTrayIcon对象
     mSysTrayIcon = new QSystemTrayIcon(this);
-    //新建托盘要显示的icon
     QIcon icon = QIcon(":/PopupClock/DDJ.png");
-    //将icon设到QSystemTrayIcon对象中
     mSysTrayIcon->setIcon(icon);
-    //当鼠标移动到托盘上的图标时，会显示此处设置的内容
-    mSysTrayIcon->setToolTip(("桀哥的时钟"));
-    //在系统托盘显示此对象
+    mSysTrayIcon->setToolTip(("桀哥的时钟 仿"));
     mSysTrayIcon->show();
 
     auto m_menu = new QMenu();
@@ -29,8 +23,8 @@ gen::gen()
     connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
     mSysTrayIcon->setContextMenu(m_menu);
     clock = new PopupClock();
-    clock->show();
     settingUI.GetParent(clock);
+    clock->show();
 }
 
 gen::~gen()

@@ -42,6 +42,8 @@ private:
     QString Minute = "29 59";
     QString Hour = "";
     QString Week = "";
+    int ClockX = 0;
+    int ClockY = 0;
     bool animteState = false;
     QString filePath = "setting.ini";
     QList<QString> *strlist;

@@ -14,13 +14,14 @@
 #include <QSettings>
 #include <QDir>
 #include <QList>
+#include <QSettings>
 class PopupClock : public QWidget
 {
     Q_OBJECT
 
 public:
     PopupClock(QWidget *parent = Q_NULLPTR);
-    void SetClockStatus(bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W);
+    void SetClockStatus(int px, int py, bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W);
     void AnimateCtrl(bool active);
     void DoDisplay();
 protected:
@@ -34,10 +35,7 @@ private:
     QString findWeekDayName(int index);
 
     Ui::PopupClockClass ui;
-//    Sets settingUI;
 	QPoint last_mouse_position_;
-//	QSystemTrayIcon* mSysTrayIcon;
-// options
     int moveStep = 350;
     int m_x = 550;
     int m_y = 50;
@@ -55,7 +53,7 @@ private:
     bool animateActive = false;
     QPropertyAnimation m_Animation0{this};
     QPropertyAnimation m_Animation1{this};
-
+    QString filePath = "setting.ini";   
 public slots:
 	void SetNumClock();
 	void MoveClock();

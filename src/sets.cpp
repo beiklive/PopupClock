@@ -20,6 +20,8 @@ Sets::Sets(QWidget *parent) :
         Minute = config->value("Config/Minute").toString();
         Hour = config->value("Config/Hour").toString();
         Week = config->value("Config/Week").toString();
+        ClockX = config->value("Config/ClockX").toInt();
+        ClockY = config->value("Config/ClockY").toInt();
     }
     else
     {
@@ -32,6 +34,8 @@ Sets::Sets(QWidget *parent) :
         config->setValue("Config/Minute",Minute);
         config->setValue("Config/Hour",Hour);
         config->setValue("Config/Week",Week);
+        config->setValue("Config/ClockX",ClockX);
+        config->setValue("Config/ClockY",ClockY);
 
     }
 qDebug() << QCoreApplication::applicationDirPath();
@@ -126,7 +130,7 @@ void Sets::GetParent(PopupClock *p)
 {
     if(p != nullptr){
         pare = p;
-        pare->SetClockStatus(animteState,ui->mspeed->value(), ui->ktime->value(), splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
+        pare->SetClockStatus(ClockX, ClockY,animteState,ui->mspeed->value(), ui->ktime->value(), splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
     }
 }
 
