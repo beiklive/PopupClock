@@ -70,18 +70,19 @@ jobs:
            $name = ${env:archiveName}
            echo "::set-output name=packageName::$name"       
       # tag 查询github-Release
-      # 上传artifacts          
-      - uses: actions/upload-artifact@v2
+      # 上传artifacts    
+      - name: Upload Artifacts      
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ steps.package.outputs.packageName }}
           path: ${{ steps.package.outputs.packageName }}
       # tag 上传Release
       - name: uploadRelease
-        if: startsWith(github.event.ref, 'refs/tags/')
+        if: startsWith(github.event.ref, 'refs/tags/v')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.package.outputs.packageName }}.zip
-          asset_name: ${{ steps.package.outputs.packageName }}.zip
+          asset_name: ${{ steps.package.outputs.packageName }}_${{ steps.package.outputs.tagName }}.zip
           tag: ${{ github.ref }}
           overwrite: true 
