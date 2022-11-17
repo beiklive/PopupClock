@@ -3,11 +3,13 @@ on:
   # push代码时触发workflow
   push:
     paths:
-      - 'PopupClock/*.pro'
+      - '*.pro'
+      - 'src/**'
       - '.github/workflows/windows.yml'
   pull_request:
     paths:
-      - 'PopupClock/*.pro'
+      - '*.pro'
+      - 'src/**'
       - '.github/workflows/windows.yml' 
 jobs:
   build:
@@ -19,7 +21,6 @@ jobs:
       # 矩阵配置
       matrix:
         include:
-          # 6.2.2
           - qt_ver: 6.2.2
             qt_arch: win64_msvc2019_64
             msvc_arch: x64
@@ -50,7 +51,6 @@ jobs:
         shell: cmd
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.msvc_arch }}
-          cd PopupClock
           qmake
           nmake
           echo winSdkDir=%WindowsSdkDir% >> %GITHUB_ENV%
