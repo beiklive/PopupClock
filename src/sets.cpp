@@ -147,8 +147,7 @@ void Sets::on_buttonBox_accepted()
 
     Hour = ui->Hour->text();
     Week = ui->Week->text();
-
-    pare->SetClockStatus(animteState, speed, ktime, splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
+    pare->SetClockStatus(pare->pos().x(), pare->pos().y(), animteState, speed, ktime, splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
     this->hide();
     auto config = new QSettings(filePath,QSettings::IniFormat);
 
