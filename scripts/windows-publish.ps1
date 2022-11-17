@@ -31,7 +31,7 @@ function Main() {
     # 拷贝依赖
     windeployqt --qmldir . --plugindir $archiveName\plugins --no-translations --compiler-runtime $archiveName\$targetName
     # 删除不必要的文件
-    $excludeList = @("*.qmlc", "*.ilk", "*.exp", "*.lib", "*.pdb")
+    $excludeList = @("*.qmlc", "*.ilk", "*.exp", "*.lib", "*.pdb", "opengl32sw.dll")
     Remove-Item -Path $archiveName -Include $excludeList -Recurse -Force
     # 拷贝vcRedist dll
     $redistDll="{0}{1}\*.CRT\*.dll" -f $env:vcToolsRedistDir.Trim(),$env:msvcArch
