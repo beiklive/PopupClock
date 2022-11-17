@@ -9,19 +9,19 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    DrawClock.cpp \
-    PopupClock.cpp \
-    gen.cpp \
-    main.cpp \
-    sets.cpp
+    src/DrawClock.cpp \
+    src/PopupClock.cpp \
+    src/gen.cpp \
+    src/main.cpp \
+    src/sets.cpp
 
 HEADERS += \
-    DrawClock.h \
-    PopupClock.h \
-    PopupClock.rc \
-    gen.h \
-    resource.h \
-    sets.h
+    src/DrawClock.h \
+    src/PopupClock.h \
+    src/PopupClock.rc \
+    src/gen.h \
+    src/resource.h \
+    src/sets.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -29,14 +29,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    PopupClock.qrc
+    src/PopupClock.qrc
 
 FORMS += \
-    PopupClock.ui \
-    sets.ui
+    src/PopupClock.ui \
+    src/sets.ui
 
 OBJECTS_DIR = build
 MOC_DIR = build
 RCC_DIR = build
 UI_DIR = build
-DESTDIR = bin
+CONFIG(debug,debug|release) {
+    DESTDIR = $$absolute_path($${_PRO_FILE_PWD_}/bin/debug)
+} else {
+    DESTDIR = $$absolute_path($${_PRO_FILE_PWD_}/bin/release)
+}

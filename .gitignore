@@ -9,7 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-
+*.stash
+Makefile
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -28,6 +29,7 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
+[Bb]uild/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
