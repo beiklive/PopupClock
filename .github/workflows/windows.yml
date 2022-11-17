@@ -83,6 +83,6 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.package.outputs.packageName }}.zip
-          asset_name: ${env:archiveName}_${{ steps.package.outputs.packageName }}_${{ steps.package.outputs.tagName }}.zip
+          asset_name: ${{ env:archiveName }}_${{ steps.package.outputs.packageName }}_${{ steps.package.outputs.tagName }}.zip
           tag: ${{ github.ref }}
           overwrite: true 
