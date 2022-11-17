@@ -113,7 +113,7 @@ border-radius:18px;
   <customwidget>
    <class>DrawClock</class>
    <extends>QWidget</extends>
-   <header>drawclock.h</header>
+   <header>DrawClock.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
