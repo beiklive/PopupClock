@@ -50,7 +50,7 @@ private:
     int ClockX = 0;
     int ClockY = 0;
     bool animteState = true;
-    QString filePath = "/setting.ini";
+    QString filePath = "setting.ini";
     QList<QString> *strlist;
 
 private:

@@ -6,8 +6,7 @@ Sets::Sets(QWidget *parent) :
     ui(new Ui::Sets)
 {
     ui->setupUi(this);
-    QString curPath = QCoreApplication::applicationDirPath();
-    QFile file(curPath + filePath);
+    QFile file(filePath);
     if(file.exists())
     {
         auto config = new QSettings(filePath,QSettings::IniFormat);
@@ -77,13 +76,22 @@ void Sets::SetAutoStart(bool flag) {
 
     QString oldPath = settings.value(name).toString();
     QString newPath = QDir::toNativeSeparators(QApplication::applicationFilePath());
+
+    QString application_name = QApplication::applicationName();
+    QString application_path = QCoreApplication::applicationFilePath();
+
     if (flag)
     {
-        if (oldPath != newPath)
-            settings.setValue(name, newPath);
+        if (oldPath != newPath){
+            application_path.replace(".exe", ".lnk");
+            if (!QFile::exists(application_path)) {
+                QFile::link(QCoreApplication::applicationFilePath(), application_name + ".lnk");
+            }
+            settings.setValue(application_name, newPath);
+        }
     }
     else {
-        settings.remove(name);
+        settings.remove(application_name);
     }
 }
 
