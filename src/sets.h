@@ -8,7 +8,7 @@
 #include <QSettings>
 #include <QDir>
 #include<QCloseEvent>
-#include <QCoreApplication>
+#include <QStandardPaths>
 #include <QProcess>
 #include "PopupClock.h"
 namespace Ui {
