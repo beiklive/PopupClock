@@ -7,6 +7,9 @@
 #include <QFile>
 #include <QSettings>
 #include <QDir>
+#include<QCloseEvent>
+#include <QCoreApplication>
+#include <QProcess>
 #include "PopupClock.h"
 namespace Ui {
 class Sets;
@@ -21,6 +24,8 @@ public:
     void GetParent(PopupClock *p);
     ~Sets();
 
+protected:
+    void closeEvent(QCloseEvent *);
 private slots:
     void on_BtnAutoStart_stateChanged(int arg1);
 
@@ -44,8 +49,8 @@ private:
     QString Week = "";
     int ClockX = 0;
     int ClockY = 0;
-    bool animteState = false;
-    QString filePath = "setting.ini";
+    bool animteState = true;
+    QString filePath = "/setting.ini";
     QList<QString> *strlist;
 
 private:
