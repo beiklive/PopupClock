@@ -6,8 +6,7 @@ Sets::Sets(QWidget *parent) :
     ui(new Ui::Sets)
 {
     ui->setupUi(this);
-    QString location = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    filePath = location + "/setting.ini";
+
     QFile file(filePath);
     if(file.exists())
     {
