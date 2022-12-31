@@ -50,7 +50,7 @@ private:
     int ClockX = 0;
     int ClockY = 0;
     bool animteState = true;
-    QString filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/setting.ini";
+    QString filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PopupClock/ddj_setting.ini";
     QList<QString> *strlist;
 
 private:

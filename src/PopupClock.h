@@ -15,6 +15,8 @@
 #include <QDir>
 #include <QList>
 #include <QSettings>
+#include <QProcess>
+#include <QStandardPaths>
 class PopupClock : public QWidget
 {
     Q_OBJECT
@@ -29,6 +31,11 @@ protected:
 	void mouseMoveEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
 
+
+public:
+    // 当设置界面出来时，时钟保持常显示
+    void ShowClock();
+    void HideClock();
 
 private:
     const QString Weeks[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -53,7 +60,7 @@ private:
     bool animateActive = false;
     QPropertyAnimation m_Animation0{this};
     QPropertyAnimation m_Animation1{this};
-    QString filePath = "setting.ini";   
+    QString filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PopupClock/ddj_setting.ini";
 public slots:
 	void SetNumClock();
 	void MoveClock();

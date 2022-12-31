@@ -6,7 +6,6 @@ Sets::Sets(QWidget *parent) :
     ui(new Ui::Sets)
 {
     ui->setupUi(this);
-
     QFile file(filePath);
     if(file.exists())
     {
@@ -33,8 +32,9 @@ Sets::Sets(QWidget *parent) :
         config->setValue("Config/Week",Week);
         config->setValue("Config/ClockX",ClockX);
         config->setValue("Config/ClockY",ClockY);
-
+        config->sync();
     }
+
     ui->checkBox->setChecked(animteState);
     ui->BtnAutoStart->setChecked(checkAutoStart());
     ui->groupBox->setEnabled(animteState);
@@ -154,6 +154,7 @@ void Sets::on_buttonBox_accepted()
     Week = ui->Week->text();
 
     this->hide();
+    qDebug() << "filePath: " << filePath;
     auto config = new QSettings(filePath,QSettings::IniFormat);
     config->setValue("Config/Animation",(animteState? "1" : "0"));
     config->setValue("Config/moveSpeed",speed);
@@ -162,6 +163,15 @@ void Sets::on_buttonBox_accepted()
     config->setValue("Config/Minute",Minute);
     config->setValue("Config/Hour",Hour);
     config->setValue("Config/Week",Week);
+    config->sync();
+    qDebug() << "animteState: " << animteState;
+    qDebug() << "moveSpeed: " << speed;
+    qDebug() << "ktime: " << ktime;
+    qDebug() << "Second: " << Second;
+    qDebug() << "Minute: " << Minute;
+    qDebug() << "Hour: " << Hour;
+    qDebug() << "Week: " << Week;
+
     pare->SetClockStatus(pare->pos().x(), pare->pos().y(), animteState, speed, ktime, splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
     qApp->quit();
     QProcess::startDetached(qApp->applicationFilePath(), QStringList());

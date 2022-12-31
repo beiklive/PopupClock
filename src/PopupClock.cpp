@@ -13,7 +13,6 @@ PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-    this->move(QPoint(m_x, m_y));
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_TranslucentBackground, true);
 
@@ -23,7 +22,6 @@ PopupClock::PopupClock(QWidget *parent)
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
     timer->start(1000);
-    MoveClockback();
 }
 
 void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W)
@@ -44,6 +42,7 @@ void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktim
     WeekList = W;
     m_x = px;
     m_y = py;
+
 }
 
 void PopupClock::AnimateCtrl(bool active)
@@ -181,6 +180,25 @@ void PopupClock::mouseReleaseEvent(QMouseEvent *event)
         auto config = new QSettings(filePath,QSettings::IniFormat);
         config->setValue("Config/ClockX",m_x);
         config->setValue("Config/ClockY",m_y);
+        config->sync();
+    }
+}
+
+void PopupClock::ShowClock()
+{
+    if(!isPop){
+        if(animateActive){
+            MoveClock();
+        }
+    }
+}
+
+void PopupClock::HideClock()
+{
+    if(!isPop){
+        if(animateActive){
+            MoveClockback();
+        }
     }
 }
 
