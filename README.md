@@ -3,6 +3,9 @@
 
 ![Alt](https://repobeats.axiom.co/api/embed/8f909ccbea090049c56d63c46e847bc678b7a403.svg "Repobeats analytics image")
 
+## 版本下载
+
+查看[全部版本](https://github.com/beiklive/PopupClock/releases/)或者下载[最新版本](https://github.com/beiklive/PopupClock/releases/latest)
 
 ## 设置说明
 [![image](img/202217912-5e430476-606e-4a9e-a20b-01c77198e133.png)](https://user-images.githubusercontent.com/73771431/202217912-5e430476-606e-4a9e-a20b-01c77198e133.png)
