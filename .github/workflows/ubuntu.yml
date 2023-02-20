@@ -36,3 +36,6 @@ jobs:
       run: |
         qmake
         make -j8
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ failure() }}

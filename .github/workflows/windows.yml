@@ -91,3 +91,6 @@ jobs:
           asset_name: ${{ steps.package.outputs.package_name }}_${{ steps.package.outputs.tagName }}.zip
           tag: ${{ github.ref }}
           overwrite: true
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ failure() }}
