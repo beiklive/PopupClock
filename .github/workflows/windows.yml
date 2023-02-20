@@ -71,9 +71,9 @@ jobs:
           & scripts\windows-publish.ps1 ${env:archiveName} ${env:targetName}
           # 记录package_name给后续step
           $name = ${env:archiveName}
-          echo "::set-output name=package_name::$name"
           $tag_name = "${{ github.ref }}" -replace "refs/tags/",""
-          echo "::set-output name=tagName::$tag_name"
+          echo "package_name=$name" >> $GITHUB_OUTPUT
+          echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
       # tag 查询github-Release
       # 上传artifacts
       - name: Upload Artifacts
@@ -88,7 +88,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.package.outputs.package_name }}.zip
-          asset_name: ${{ steps.package.outputs.package_name }}_${{ steps.package.outputs.tagName }}.zip
+          asset_name: ${{ steps.package.outputs.package_name }}_${{ steps.package.outputs.tag_name }}.zip
           tag: ${{ github.ref }}
           overwrite: true
       - name: Setup tmate session
