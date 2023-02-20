@@ -1,6 +1,5 @@
-name: Windows
-on: 
-  # push代码时触发workflow
+name: Windows CI
+on:
   push:
     paths:
       - '*.pro'
@@ -10,18 +9,20 @@ on:
     paths:
       - '*.pro'
       - 'src/**'
-      - '.github/workflows/windows.yml' 
+      - '.github/workflows/windows.yml'
 jobs:
   build:
     name: Build
-    # 运行平台， windows-latest目前是windows server 2019 
-    # 参考文档 https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
     runs-on: windows-2019
     strategy:
       # 矩阵配置
       matrix:
         include:
-          - qt_ver: 6.2.2
+          - qt_ver: 5.15.2
+            qt_arch: win32_msvc2019
+            msvc_arch: x86
+            qt_arch_install: msvc2019
+          - qt_ver: 5.15.2
             qt_arch: win64_msvc2019_64
             msvc_arch: x64
             qt_arch_install: msvc2019_64
@@ -40,13 +41,15 @@ jobs:
           # target: ${{ matrix.qt_target }}
           arch: ${{ matrix.qt_arch }}
           cached: 'false'
-          aqtversion: '==2.0.5'          
+          aqtversion: '==2.0.5'
       # 拉取代码
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
+          submodules: 'true'
           fetch-depth: 1
       # msvc编译
-      - name: msvc-build
+      - name: Build Windows
         id: build
         shell: cmd
         run: |
@@ -57,32 +60,34 @@ jobs:
           echo winSdkVer=%WindowsSdkVersion% >> %GITHUB_ENV%
           echo vcToolsInstallDir=%VCToolsInstallDir% >> %GITHUB_ENV%
           echo vcToolsRedistDir=%VCToolsRedistDir% >> %GITHUB_ENV%
-      # 打包 
-      - name: package
-        id: package      
+      # 打包
+      - name: Package
+        id: package
         env:
-          archiveName: ${{ matrix.qt_ver }}-${{ matrix.qt_target }}-${{ matrix.qt_arch }}
-          msvcArch: ${{ matrix.msvc_arch }}          
+          archiveName: PopupClock_windows_${{ matrix.msvc_arch }}
+          msvcArch: ${{ matrix.msvc_arch }}
         shell: pwsh
         run: |
           & scripts\windows-publish.ps1 ${env:archiveName} ${env:targetName}
-          # 记录packageName给后续step
-           $name = ${env:archiveName}
-           echo "::set-output name=packageName::$name"       
+          # 记录package_name给后续step
+          $name = ${env:archiveName}
+          echo "::set-output name=package_name::$name"
+          $tag_name = "${{ github.ref }}" -replace "refs/tags/",""
+          echo "::set-output name=tagName::$tag_name"
       # tag 查询github-Release
-      # 上传artifacts    
-      - name: Upload Artifacts      
-        uses: actions/upload-artifact@v2
+      # 上传artifacts
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.package.outputs.packageName }}
-          path: ${{ steps.package.outputs.packageName }}
+          name: ${{ steps.package.outputs.package_name }}
+          path: ${{ steps.package.outputs.package_name }}
       # tag 上传Release
-      - name: uploadRelease
+      - name: Upload Release
         if: startsWith(github.event.ref, 'refs/tags/v')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.package.outputs.packageName }}.zip
-          asset_name: ${{ steps.package.outputs.packageName }}_${{ steps.package.outputs.tagName }}.zip
+          file: ${{ steps.package.outputs.package_name }}.zip
+          asset_name: ${{ steps.package.outputs.package_name }}_${{ steps.package.outputs.tagName }}.zip
           tag: ${{ github.ref }}
-          overwrite: true 
+          overwrite: true
