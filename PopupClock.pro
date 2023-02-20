@@ -3,8 +3,9 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = vNes
+TARGET = PopupClock
 
+INCLUDEPATH += src
 OBJECTS_DIR = build/obj/
 MOC_DIR = build/
 RCC_DIR = build/
@@ -15,6 +16,7 @@ CONFIG(debug,debug|release) {
 } else {
     DESTDIR = $$absolute_path(bin/release)
 }
+
 
 QT += core \
     gui \
