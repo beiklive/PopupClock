@@ -74,13 +74,6 @@ jobs:
           $tag_name = "${{ github.ref }}" -replace "refs/tags/",""
           echo "package_name=$name" >> $GITHUB_OUTPUT
           echo "tag_name=$tag_name" >> $GITHUB_OUTPUT
-      # tag 查询github-Release
-      # 上传artifacts
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ steps.package.outputs.package_name }}
-          path: ${{ steps.package.outputs.package_name }}
       # tag 上传Release
       - name: Upload Release
         if: startsWith(github.event.ref, 'refs/tags/v')
