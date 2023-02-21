@@ -64,7 +64,7 @@ jobs:
       - name: Package
         id: package
         env:
-          archiveName: 仿超级小桀时钟_windows_${{ matrix.msvc_arch }}
+          archiveName: PopupClock_windows_${{ matrix.msvc_arch }}
           msvcArch: ${{ matrix.msvc_arch }}
         shell: pwsh
         run: |
