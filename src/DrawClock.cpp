@@ -30,18 +30,28 @@ const QPoint DrawClock::secondHand[4] = {
 
 void DrawClock::paintEvent(QPaintEvent*)
 {
-	QPainter painter(this);
-	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.translate(width() / 2, height() / 2);
-	int size = width() < height() ? width() : height();
-	painter.scale(size / 220.0, size / 220.0);
+    // 创建一个大小与窗口相同的圆形缓冲区
+    QPixmap buffer(size());
+    buffer.fill(Qt::transparent);
+
+    // 在缓冲区中绘制图形
+    QPainter painter(&buffer);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.translate(width() / 2, height() / 2);
+    int size = qMin(width(), height());
+    painter.scale(size / 220.0, size / 220.0);
     time = QTime::currentTime();
-	drawBackgroud(&painter);
-	drawHourHand(&painter);
-	drawMinuteHand(&painter);
-	drawsecondHand(&painter);
-	painter.setBrush(Qt::black);
-	drawCentre(&painter);
+    drawBackgroud(&painter);
+    drawHourHand(&painter);
+    drawMinuteHand(&painter);
+    drawsecondHand(&painter);
+    painter.setBrush(Qt::black);
+    drawCentre(&painter);
+
+    // 将缓冲区中的图形绘制到屏幕上
+    QPainter screenPainter(this);
+    screenPainter.setRenderHint(QPainter::Antialiasing, true);
+    screenPainter.drawPixmap(rect(), buffer, buffer.rect());
 }
 void DrawClock::drawHourHand(QPainter* painter)
 {

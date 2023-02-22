@@ -1,22 +1,23 @@
 #include "core_operation.h"
-#include <QSystemTrayIcon>
-#include <QIcon>
-#include <QDebug>
 #pragma execution_character_set("utf-8")
 
 PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint);
-    this->setAttribute(Qt::WA_TranslucentBackground, true);
 
-	QTime time = QTime::currentTime();
-	QString txtTime = time.toString("hh:mm:ss");
-	ui.lcdNumber->display(txtTime);
+    // lcd时间初始化
+	ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
+    // 设置定时器
     QTimer* timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
     timer->start(1000);
+
+
+    // 设置窗口背景透明
+    this->setAttribute(Qt::WA_TranslucentBackground, true);
+    // 设置窗口置顶
+    this->TopSetWindow();
 }
 
 void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W)
@@ -45,13 +46,22 @@ void PopupClock::AnimateCtrl(bool active)
     animateActive = active;
 }
 
+void PopupClock::TopSetWindow()
+{
+#ifdef Q_OS_WIN
+    ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+//
+#else
+    // other
+#endif
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint | Qt::ToolTip);
+    show();
+    activateWindow();
+}
+
 void PopupClock::SetNumClock()
 {
-    QTime time = QTime::currentTime();
-    QString txtTime = time.toString("hh:mm:ss");
-
-    ui.lcdNumber->display(txtTime);
-
+    ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
 
     if(animateActive && WeekList != nullptr){
         QDateTime current_date_time = QDateTime::currentDateTime();
@@ -183,9 +193,9 @@ bool PopupClock::eventFilter(QObject *obj, QEvent *event)
 {
     if(obj == this && event->type() == QEvent::WindowDeactivate)
     {
-        qDebug() << "deactive ===========";
         activateWindow();
     }
+    return true;
 }
 
 void PopupClock::ShowClock()

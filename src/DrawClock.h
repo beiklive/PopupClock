@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-
+#include <QPixmap>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTime>

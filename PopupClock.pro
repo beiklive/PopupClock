@@ -16,7 +16,9 @@ CONFIG(debug,debug|release) {
 } else {
     DESTDIR = $$absolute_path(bin/release)
 }
-
+win32  {
+    LIBS += -luser32
+}
 
 QT += core \
     gui \

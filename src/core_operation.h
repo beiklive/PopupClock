@@ -2,7 +2,7 @@
 
 #include <QtWidgets/QWidget>
 #include "ui_PopupClock.h"
-
+#include <QtGlobal>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QTime>
@@ -17,6 +17,16 @@
 #include <QSettings>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QIcon>
+#include <QDebug>
+
+
+#ifdef Q_OS_WIN
+    #include <Windows.h>
+#else
+    // Other operating systems
+#endif
+
 class PopupClock : public QWidget
 {
     Q_OBJECT
@@ -26,6 +36,9 @@ public:
     void SetClockStatus(int px, int py, bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W);
     void AnimateCtrl(bool active);
     void DoDisplay();
+
+    void TopSetWindow();
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
