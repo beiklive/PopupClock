@@ -1,13 +1,8 @@
-#include "PopupClock.h"
+#include "core_operation.h"
 #include <QSystemTrayIcon>
 #include <QIcon>
 #include <QDebug>
 #pragma execution_character_set("utf-8")
-
-
-
-
-
 
 PopupClock::PopupClock(QWidget *parent)
     : QWidget(parent)
@@ -181,6 +176,15 @@ void PopupClock::mouseReleaseEvent(QMouseEvent *event)
         config->setValue("Config/ClockX",m_x);
         config->setValue("Config/ClockY",m_y);
         config->sync();
+    }
+}
+
+bool PopupClock::eventFilter(QObject *obj, QEvent *event)
+{
+    if(obj == this && event->type() == QEvent::WindowDeactivate)
+    {
+        qDebug() << "deactive ===========";
+        activateWindow();
     }
 }
 

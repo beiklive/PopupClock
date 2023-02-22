@@ -8,10 +8,6 @@ DrawClock::DrawClock(QWidget *parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
-DrawClock::~DrawClock()
-{
-}
-
 const QPoint DrawClock::hourHand[4] = {
 	QPoint(4, 0),
 	QPoint(-4, 0),
@@ -39,6 +35,7 @@ void DrawClock::paintEvent(QPaintEvent*)
 	painter.translate(width() / 2, height() / 2);
 	int size = width() < height() ? width() : height();
 	painter.scale(size / 220.0, size / 220.0);
+    time = QTime::currentTime();
 	drawBackgroud(&painter);
 	drawHourHand(&painter);
 	drawMinuteHand(&painter);
@@ -48,7 +45,6 @@ void DrawClock::paintEvent(QPaintEvent*)
 }
 void DrawClock::drawHourHand(QPainter* painter)
 {
-	QTime time = QTime::currentTime();
 	painter->setBrush(Qt::black);
 	painter->setPen(Qt::black);
 	painter->save();
@@ -58,7 +54,6 @@ void DrawClock::drawHourHand(QPainter* painter)
 }
 void DrawClock::drawMinuteHand(QPainter* painter)
 {
-	QTime time = QTime::currentTime();
 	painter->setBrush(Qt::black);
 	painter->setPen(Qt::black);
 	painter->save();
@@ -68,7 +63,6 @@ void DrawClock::drawMinuteHand(QPainter* painter)
 }
 void DrawClock::drawsecondHand(QPainter* painter)
 {
-	QTime time = QTime::currentTime();
 	painter->setBrush(Qt::red);
 	painter->setPen(Qt::red);
 	painter->save();

@@ -10,7 +10,7 @@
 #include<QCloseEvent>
 #include <QStandardPaths>
 #include <QProcess>
-#include "PopupClock.h"
+#include "core_operation.h"
 namespace Ui {
 class Sets;
 }

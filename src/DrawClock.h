@@ -12,11 +12,12 @@ class DrawClock : public QWidget
 
 public:
 	DrawClock(QWidget *parent);
-	~DrawClock();
+    ~DrawClock() = default;
 private:
 	static const QPoint hourHand[4];
 	static const QPoint minuteHand[4];
 	static const QPoint secondHand[4];
+    QTime time;
 
 protected:
 	void paintEvent(QPaintEvent*);

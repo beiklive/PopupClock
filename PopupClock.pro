@@ -23,19 +23,19 @@ QT += core \
     widgets
 
 SOURCES += \
-    src/DrawClock.cpp \
-    src/PopupClock.cpp \
-    src/gen.cpp \
     src/main.cpp \
-    src/sets.cpp
+    src/clock_settings.cpp \
+    src/core_traymenu.cpp \
+    src/core_operation.cpp \
+    src/DrawClock.cpp
 
 HEADERS += \
-    src/DrawClock.h \
-    src/PopupClock.h \
     src/PopupClock.rc \
-    src/gen.h \
     src/resource.h \
-    src/sets.h
+    src/clock_settings.h \
+    src/core_traymenu.h \
+    src/core_operation.h \
+    src/DrawClock.h
 
 RESOURCES += \
     src/PopupClock.qrc

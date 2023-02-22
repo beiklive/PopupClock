@@ -13,8 +13,8 @@
 #include <QSettings>
 #include <QDir>
 #include <QList>
-#include "PopupClock.h"
-#include "sets.h"
+#include "core_operation.h"
+#include "clock_settings.h"
 
 
 class gen : public QObject

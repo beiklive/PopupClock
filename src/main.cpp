@@ -1,6 +1,6 @@
 
 #include <QtWidgets/QApplication>
-#include "gen.h"
+#include "core_traymenu.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

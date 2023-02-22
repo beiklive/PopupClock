@@ -1,4 +1,4 @@
-#include "sets.h"
+#include "clock_settings.h"
 #include "ui_sets.h"
 #include <QDebug>
 Sets::Sets(QWidget *parent) :

@@ -1,4 +1,4 @@
-#include "gen.h"
+#include "core_traymenu.h"
 #pragma execution_character_set("utf-8")
 
 gen::gen()

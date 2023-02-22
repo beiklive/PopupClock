@@ -30,7 +30,7 @@ protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
-
+    bool eventFilter(QObject *obj, QEvent *event);
 
 public:
     // 当设置界面出来时，时钟保持常显示
