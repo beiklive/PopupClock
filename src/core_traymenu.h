@@ -16,25 +16,21 @@
 #include "core_operation.h"
 #include "clock_settings.h"
 
-
 class gen : public QObject
 {
     Q_OBJECT
 
 public:
     explicit gen();
-    ~gen();
+    ~gen() = default;
 
 private:
-
     PopupClock *clock;
     Sets settingUI;
 
-
-    QSystemTrayIcon* mSysTrayIcon;
-    QAction* m_pActionAutoStart;
-    QAction* m_pActionExit;
-
+    QSystemTrayIcon *mSysTrayIcon;
+    QAction *m_pActionAutoStart;
+    QAction *m_pActionExit;
 
 public slots:
     void ShowSetting();

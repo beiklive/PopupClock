@@ -20,11 +20,10 @@
 #include <QIcon>
 #include <QDebug>
 
-
 #ifdef Q_OS_WIN
-    #include <Windows.h>
+#include <Windows.h>
 #else
-    // Other operating systems
+// Other operating systems
 #endif
 
 class PopupClock : public QWidget
@@ -35,14 +34,12 @@ public:
     PopupClock(QWidget *parent = Q_NULLPTR);
     void SetClockStatus(int px, int py, bool active, int speed, int ktime, QList<QString> *S, QList<QString> *M, QList<QString> *H, QList<QString> *W);
     void AnimateCtrl(bool active);
-    void DoDisplay();
-
     void TopSetWindow();
 
 protected:
-	void mousePressEvent(QMouseEvent* event);
-	void mouseMoveEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     bool eventFilter(QObject *obj, QEvent *event);
 
 public:
@@ -55,14 +52,14 @@ private:
     QString findWeekDayName(int index);
 
     Ui::PopupClockClass ui;
-	QPoint last_mouse_position_;
-    int moveStep = 350;
-    int m_x = 550;
-    int m_y = 50;
-    int moveSpeed = 1500;
-    int keepTime = 60;
+    QPoint last_mouse_position_;
+    int moveStep = 350;   // 动画移动步长
+    int m_x = 550;        // 时钟位置
+    int m_y = 50;         // 时钟位置
+    int moveSpeed = 1500; // 动画移动速度
+    int keepTime = 60;    // 时钟保持时间
     int finishTime = 0;
-    bool isPop = true;
+    bool isPop = true; // 是否弹出
     bool tempState;
 
     QList<QString> *SecondList{nullptr};
@@ -75,9 +72,7 @@ private:
     QPropertyAnimation m_Animation1{this};
     QString filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PopupClock/ddj_setting.ini";
 public slots:
-	void SetNumClock();
-	void MoveClock();
-	void MoveClockback();
-
-
+    void SetNumClock();
+    void MoveClock();
+    void MoveClockback();
 };

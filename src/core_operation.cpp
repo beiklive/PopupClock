@@ -7,12 +7,11 @@ PopupClock::PopupClock(QWidget *parent)
     ui.setupUi(this);
 
     // lcd时间初始化
-	ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
+    ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
     // 设置定时器
-    QTimer* timer = new QTimer(this);
+    QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
     timer->start(1000);
-
 
     // 设置窗口背景透明
     this->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -25,7 +24,7 @@ void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktim
     AnimateCtrl(active);
     moveSpeed = speed;
     keepTime = ktime;
-    if(SecondList != nullptr)
+    if (SecondList != nullptr)
     {
         delete SecondList;
         delete MinuteList;
@@ -38,7 +37,6 @@ void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktim
     WeekList = W;
     m_x = px;
     m_y = py;
-
 }
 
 void PopupClock::AnimateCtrl(bool active)
@@ -50,7 +48,6 @@ void PopupClock::TopSetWindow()
 {
 #ifdef Q_OS_WIN
     ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-//
 #else
     // other
 #endif
@@ -63,7 +60,8 @@ void PopupClock::SetNumClock()
 {
     ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
 
-    if(animateActive && WeekList != nullptr){
+    if (animateActive && WeekList != nullptr)
+    {
         QDateTime current_date_time = QDateTime::currentDateTime();
         int curtime = current_date_time.toSecsSinceEpoch();
         QString current_week = current_date_time.toString("dddd");
@@ -74,57 +72,53 @@ void PopupClock::SetNumClock()
         for (auto k = WeekList->begin(); k != WeekList->end(); k++)
         {
 
-            if(current_week != findWeekDayName((*k).toInt()))
+            if (current_week != findWeekDayName((*k).toInt()))
                 continue;
             for (auto j = HourList->begin(); j != HourList->end(); j++)
             {
 
-                if(current_hour != *j)
+                if (current_hour != *j)
                     continue;
 
                 for (auto l = MinuteList->begin(); l != MinuteList->end(); l++)
                 {
-                    if(current_minute != *l)
+                    if (current_minute != *l)
                         continue;
                     for (auto i = SecondList->begin(); i != SecondList->end(); i++)
                     {
 
-                        if(current_second == *i)
+                        if (current_second == *i)
                         {
                             MoveClock();
                             finishTime = curtime + keepTime;
                             break;
                         }
-
                     }
                 }
             }
         }
-        if(curtime == finishTime){
+        if (curtime == finishTime)
+        {
             MoveClockback();
         }
     }
-
 }
 
-
-
-
-
-void PopupClock::MoveClock() {
+void PopupClock::MoveClock()
+{
     isPop = true;
 
-    QPropertyAnimation* m_pAnimation =&m_Animation0;
+    QPropertyAnimation *m_pAnimation = &m_Animation0;
     m_pAnimation->setTargetObject(this);
     m_pAnimation->setPropertyName("pos");
     m_pAnimation->setDuration(moveSpeed);
     m_pAnimation->setStartValue(QPoint(m_x - moveStep, m_y));
     m_pAnimation->setEndValue(QPoint(m_x, m_y));
-	m_pAnimation->start();
+    m_pAnimation->start();
 
-    QPropertyAnimation* m_pAnimation2 = &m_Animation1;
+    QPropertyAnimation *m_pAnimation2 = &m_Animation1;
     m_pAnimation2->setTargetObject(this);
-    m_pAnimation2->setPropertyName("windowOpacity"); 
+    m_pAnimation2->setPropertyName("windowOpacity");
     m_pAnimation2->setDuration(moveSpeed);
     m_pAnimation2->setKeyValueAt(0, 0);
     m_pAnimation2->setKeyValueAt(0.5, 1);
@@ -132,66 +126,69 @@ void PopupClock::MoveClock() {
     m_pAnimation2->start();
 }
 
-void PopupClock::MoveClockback() {
+void PopupClock::MoveClockback()
+{
     isPop = false;
-    QPropertyAnimation* m_pAnimation =&m_Animation0;
+    QPropertyAnimation *m_pAnimation = &m_Animation0;
     m_pAnimation->setTargetObject(this);
     m_pAnimation->setPropertyName("pos");
     m_pAnimation->setDuration(moveSpeed);
     m_pAnimation->setStartValue(QPoint(m_x, m_y));
     m_pAnimation->setEndValue(QPoint(m_x - moveStep, m_y));
-	m_pAnimation->start();
-    QPropertyAnimation* m_pAnimation2 = &m_Animation1;
+    m_pAnimation->start();
+    QPropertyAnimation *m_pAnimation2 = &m_Animation1;
     m_pAnimation2->setTargetObject(this);
     m_pAnimation2->setPropertyName("windowOpacity");
-    m_pAnimation2->setDuration(moveSpeed); 
+    m_pAnimation2->setDuration(moveSpeed);
     m_pAnimation2->setKeyValueAt(0, 1);
     m_pAnimation2->setKeyValueAt(0.5, 1);
     m_pAnimation2->setKeyValueAt(1, 0);
     m_pAnimation2->start();
-
 }
-void PopupClock::mousePressEvent(QMouseEvent* event)
+void PopupClock::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton){
+    if (event->button() == Qt::LeftButton)
+    {
         tempState = animateActive;
         animateActive = false;
-		last_mouse_position_ = event->globalPos();
+        last_mouse_position_ = event->globalPos();
     }
 }
 
-void PopupClock::mouseMoveEvent(QMouseEvent* event)
+void PopupClock::mouseMoveEvent(QMouseEvent *event)
 {
-	if (!event->buttons().testFlag(Qt::LeftButton))
-		return;
-	const QPoint position = pos() + event->globalPos() - last_mouse_position_;
-	move(position.x(), position.y());
-	last_mouse_position_ = event->globalPos();
-
+    if (!event->buttons().testFlag(Qt::LeftButton))
+        return;
+    const QPoint position = pos() + event->globalPos() - last_mouse_position_;
+    move(position.x(), position.y());
+    last_mouse_position_ = event->globalPos();
 }
 
 void PopupClock::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)    // Left button...
+    if (event->button() == Qt::LeftButton) // Left button...
     {
         animateActive = tempState;
-        if(isPop){
+        if (isPop)
+        {
             m_x = this->pos().x();
             m_y = this->pos().y();
-        }else{
+        }
+        else
+        {
             m_x = this->pos().x() + moveStep;
             m_y = this->pos().y();
         }
-        auto config = new QSettings(filePath,QSettings::IniFormat);
-        config->setValue("Config/ClockX",m_x);
-        config->setValue("Config/ClockY",m_y);
+        auto config = new QSettings(filePath, QSettings::IniFormat);
+        config->setValue("Config/ClockX", m_x);
+        config->setValue("Config/ClockY", m_y);
         config->sync();
     }
 }
 
 bool PopupClock::eventFilter(QObject *obj, QEvent *event)
 {
-    if(obj == this && event->type() == QEvent::WindowDeactivate)
+    if (obj == this && event->type() == QEvent::WindowDeactivate)
     {
         activateWindow();
     }
@@ -200,8 +197,10 @@ bool PopupClock::eventFilter(QObject *obj, QEvent *event)
 
 void PopupClock::ShowClock()
 {
-    if(!isPop){
-        if(animateActive){
+    if (!isPop)
+    {
+        if (animateActive)
+        {
             MoveClock();
         }
     }
@@ -209,8 +208,10 @@ void PopupClock::ShowClock()
 
 void PopupClock::HideClock()
 {
-    if(!isPop){
-        if(animateActive){
+    if (!isPop)
+    {
+        if (animateActive)
+        {
             MoveClockback();
         }
     }

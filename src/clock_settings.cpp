@@ -1,16 +1,15 @@
 #include "clock_settings.h"
 #include "ui_sets.h"
 #include <QDebug>
-Sets::Sets(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::Sets)
+Sets::Sets(QWidget *parent) : QWidget(parent),
+                              ui(new Ui::Sets)
 {
     ui->setupUi(this);
     QFile file(filePath);
-    if(file.exists())
+    if (file.exists())
     {
-        auto config = new QSettings(filePath,QSettings::IniFormat);
-        animteState = config->value("Config/Animation").toInt() == 0? false : true;
+        auto config = new QSettings(filePath, QSettings::IniFormat);
+        animteState = config->value("Config/Animation").toInt() == 0 ? false : true;
         moveSpeed = config->value("Config/moveSpeed").toInt();
         keepTime = config->value("Config/keeptime").toInt();
         Second = config->value("Config/Second").toString();
@@ -22,16 +21,16 @@ Sets::Sets(QWidget *parent) :
     }
     else
     {
-        auto config = new QSettings(filePath,QSettings::IniFormat);
-        config->setValue("Config/Animation","1");
-        config->setValue("Config/moveSpeed",moveSpeed);
-        config->setValue("Config/keeptime",keepTime);
-        config->setValue("Config/Second",Second);
-        config->setValue("Config/Minute",Minute);
-        config->setValue("Config/Hour",Hour);
-        config->setValue("Config/Week",Week);
-        config->setValue("Config/ClockX",ClockX);
-        config->setValue("Config/ClockY",ClockY);
+        auto config = new QSettings(filePath, QSettings::IniFormat);
+        config->setValue("Config/Animation", "1");
+        config->setValue("Config/moveSpeed", moveSpeed);
+        config->setValue("Config/keeptime", keepTime);
+        config->setValue("Config/Second", Second);
+        config->setValue("Config/Minute", Minute);
+        config->setValue("Config/Hour", Hour);
+        config->setValue("Config/Week", Week);
+        config->setValue("Config/ClockX", ClockX);
+        config->setValue("Config/ClockY", ClockY);
         config->sync();
     }
 
@@ -44,8 +43,6 @@ Sets::Sets(QWidget *parent) :
     ui->Minute->setText(Minute);
     ui->Hour->setText(Hour);
     ui->Week->setText(Week);
-
-
 }
 
 Sets::~Sets()
@@ -60,7 +57,8 @@ void Sets::closeEvent(QCloseEvent *e)
     on_buttonBox_rejected();
 }
 
-bool Sets::checkAutoStart() {
+bool Sets::checkAutoStart()
+{
     QSettings settings(AUTO_RUN, QSettings::NativeFormat);
     QFileInfo fInfo(QApplication::applicationFilePath());
     QString name = fInfo.baseName();
@@ -69,7 +67,8 @@ bool Sets::checkAutoStart() {
     return (settings.contains(name) && newPath == oldPath);
 }
 
-void Sets::SetAutoStart(bool flag) {
+void Sets::SetAutoStart(bool flag)
+{
     QSettings settings(AUTO_RUN, QSettings::NativeFormat);
 
     QFileInfo fInfo(QApplication::applicationFilePath());
@@ -82,33 +81,37 @@ void Sets::SetAutoStart(bool flag) {
         if (oldPath != newPath)
             settings.setValue(name, newPath);
     }
-    else {
+    else
+    {
         settings.remove(name);
     }
 }
 
 void Sets::on_BtnAutoStart_stateChanged(int arg1)
 {
-    if(arg1 == 2){
+    if (arg1 == 2)
+    {
         SetAutoStart(true);
     }
-    else {
+    else
+    {
         SetAutoStart(false);
     }
 }
 
-
 // 字符串按空格分割，返回列表
-QList<QString>* Sets::splitString(QString str, int MaxNum)
+QList<QString> *Sets::splitString(QString str, int MaxNum)
 {
     strlist = new QList<QString>;
-    if(str.isEmpty())
+    if (str.isEmpty())
     {
         for (size_t i = 0; i < MaxNum; i++)
         {
             strlist->append(QString::number(i));
         }
-    }else{
+    }
+    else
+    {
         int start = 0;
         int end = 0;
         while (end != -1)
@@ -130,17 +133,15 @@ QList<QString>* Sets::splitString(QString str, int MaxNum)
 
 void Sets::GetParent(PopupClock *p)
 {
-    if(p != nullptr){
+    if (p != nullptr)
+    {
         pare = p;
-        pare->SetClockStatus(ClockX, ClockY,animteState,ui->mspeed->value(), ui->ktime->value(), splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
+        pare->SetClockStatus(ClockX, ClockY, animteState, ui->mspeed->value(), ui->ktime->value(), splitString(Second, 60), splitString(Minute, 60), splitString(Hour, 24), splitString(Week, 7));
         pare->move(ClockX, ClockY);
-        if(animteState)
+        if (animteState)
             pare->MoveClockback();
     }
 }
-
-
-
 
 void Sets::on_buttonBox_accepted()
 {
@@ -155,14 +156,14 @@ void Sets::on_buttonBox_accepted()
 
     this->hide();
     qDebug() << "filePath: " << filePath;
-    auto config = new QSettings(filePath,QSettings::IniFormat);
-    config->setValue("Config/Animation",(animteState? "1" : "0"));
-    config->setValue("Config/moveSpeed",speed);
-    config->setValue("Config/keeptime",ktime);
-    config->setValue("Config/Second",Second);
-    config->setValue("Config/Minute",Minute);
-    config->setValue("Config/Hour",Hour);
-    config->setValue("Config/Week",Week);
+    auto config = new QSettings(filePath, QSettings::IniFormat);
+    config->setValue("Config/Animation", (animteState ? "1" : "0"));
+    config->setValue("Config/moveSpeed", speed);
+    config->setValue("Config/keeptime", ktime);
+    config->setValue("Config/Second", Second);
+    config->setValue("Config/Minute", Minute);
+    config->setValue("Config/Hour", Hour);
+    config->setValue("Config/Week", Week);
     config->sync();
     qDebug() << "animteState: " << animteState;
     qDebug() << "moveSpeed: " << speed;
@@ -172,11 +173,10 @@ void Sets::on_buttonBox_accepted()
     qDebug() << "Hour: " << Hour;
     qDebug() << "Week: " << Week;
 
-    pare->SetClockStatus(pare->pos().x(), pare->pos().y(), animteState, speed, ktime, splitString(Second, 60),splitString(Minute, 60),splitString(Hour, 24),splitString(Week, 7));
+    pare->SetClockStatus(pare->pos().x(), pare->pos().y(), animteState, speed, ktime, splitString(Second, 60), splitString(Minute, 60), splitString(Hour, 24), splitString(Week, 7));
     qApp->quit();
     QProcess::startDetached(qApp->applicationFilePath(), QStringList());
 }
-
 
 void Sets::on_buttonBox_rejected()
 {
@@ -185,9 +185,7 @@ void Sets::on_buttonBox_rejected()
     QProcess::startDetached(qApp->applicationFilePath(), QStringList());
 }
 
-
 void Sets::on_checkBox_clicked(bool checked)
 {
     animteState = checked;
 }
-

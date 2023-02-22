@@ -7,12 +7,13 @@
 #include <QFile>
 #include <QSettings>
 #include <QDir>
-#include<QCloseEvent>
+#include <QCloseEvent>
 #include <QStandardPaths>
 #include <QProcess>
 #include "core_operation.h"
-namespace Ui {
-class Sets;
+namespace Ui
+{
+    class Sets;
 }
 
 class Sets : public QWidget
@@ -28,7 +29,6 @@ protected:
     void closeEvent(QCloseEvent *);
 private slots:
     void on_BtnAutoStart_stateChanged(int arg1);
-
 
     void on_buttonBox_accepted();
 
@@ -58,7 +58,6 @@ private:
     void SetAutoStart(bool flag);
 
     QList<QString> *splitString(QString str, int MaxNum);
-
 };
 
 #endif // SETS_H

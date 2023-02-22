@@ -23,13 +23,7 @@ gen::gen()
     connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
     mSysTrayIcon->setContextMenu(m_menu);
     clock = new PopupClock();
-//    clock->show();
     settingUI.GetParent(clock);
-
-}
-
-gen::~gen()
-{
 }
 
 void gen::ShowSetting()
