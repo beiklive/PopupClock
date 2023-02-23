@@ -1,6 +1,7 @@
 #include "clock_settings.h"
 #include "ui_sets.h"
 #include <QDebug>
+
 Sets::Sets(QWidget *parent) : QWidget(parent),
                               ui(new Ui::Sets)
 {
@@ -8,6 +9,7 @@ Sets::Sets(QWidget *parent) : QWidget(parent),
     QFile file(filePath);
     if (file.exists())
     {
+        logger->info("[Config Event] config exists");
         auto config = new QSettings(filePath, QSettings::IniFormat);
         animteState = config->value("Config/Animation").toInt() == 0 ? false : true;
         moveSpeed = config->value("Config/moveSpeed").toInt();
@@ -21,6 +23,7 @@ Sets::Sets(QWidget *parent) : QWidget(parent),
     }
     else
     {
+        logger->info("[Config Event] create config");
         auto config = new QSettings(filePath, QSettings::IniFormat);
         config->setValue("Config/Animation", "1");
         config->setValue("Config/moveSpeed", moveSpeed);
@@ -33,7 +36,8 @@ Sets::Sets(QWidget *parent) : QWidget(parent),
         config->setValue("Config/ClockY", ClockY);
         config->sync();
     }
-
+    logger->info("[Config Event] Data Init animteState({}) checkAutoStart({}) moveSpeed({}) keepTime({}) Second({}) Minute({}) Hour({}) Week({})", \
+                                                animteState, checkAutoStart(), moveSpeed, keepTime, std::string(Second.toLocal8Bit()), std::string(Minute.toLocal8Bit()), std::string(Hour.toLocal8Bit()), std::string(Week.toLocal8Bit()));
     ui->checkBox->setChecked(animteState);
     ui->BtnAutoStart->setChecked(checkAutoStart());
     ui->groupBox->setEnabled(animteState);
@@ -53,7 +57,7 @@ Sets::~Sets()
 void Sets::closeEvent(QCloseEvent *e)
 {
     e->ignore();
-    qDebug() << "close";
+    logger->info("[Close Event]");
     on_buttonBox_rejected();
 }
 
@@ -79,11 +83,15 @@ void Sets::SetAutoStart(bool flag)
     if (flag)
     {
         if (oldPath != newPath)
+        {
             settings.setValue(name, newPath);
+            logger->info("[Config Event] Set auto start");
+        }
     }
     else
     {
         settings.remove(name);
+        logger->info("[Config Event] Cancel auto start");
     }
 }
 
@@ -155,7 +163,6 @@ void Sets::on_buttonBox_accepted()
     Week = ui->Week->text();
 
     this->hide();
-    qDebug() << "filePath: " << filePath;
     auto config = new QSettings(filePath, QSettings::IniFormat);
     config->setValue("Config/Animation", (animteState ? "1" : "0"));
     config->setValue("Config/moveSpeed", speed);
@@ -165,15 +172,12 @@ void Sets::on_buttonBox_accepted()
     config->setValue("Config/Hour", Hour);
     config->setValue("Config/Week", Week);
     config->sync();
-    qDebug() << "animteState: " << animteState;
-    qDebug() << "moveSpeed: " << speed;
-    qDebug() << "ktime: " << ktime;
-    qDebug() << "Second: " << Second;
-    qDebug() << "Minute: " << Minute;
-    qDebug() << "Hour: " << Hour;
-    qDebug() << "Week: " << Week;
+
+    logger->info("[Config Event] Data Set animteState({}) checkAutoStart({}) moveSpeed({}) keepTime({}) Second({}) Minute({}) Hour({}) Week({})", \
+                                                animteState, checkAutoStart(), moveSpeed, keepTime, std::string(Second.toLocal8Bit()), std::string(Minute.toLocal8Bit()), std::string(Hour.toLocal8Bit()), std::string(Week.toLocal8Bit()));
 
     pare->SetClockStatus(pare->pos().x(), pare->pos().y(), animteState, speed, ktime, splitString(Second, 60), splitString(Minute, 60), splitString(Hour, 24), splitString(Week, 7));
+    logger->info("[Restart Event]");
     qApp->quit();
     QProcess::startDetached(qApp->applicationFilePath(), QStringList());
 }
@@ -181,11 +185,13 @@ void Sets::on_buttonBox_accepted()
 void Sets::on_buttonBox_rejected()
 {
     this->hide();
+    logger->info("[Restart Event]");
     qApp->quit();
     QProcess::startDetached(qApp->applicationFilePath(), QStringList());
 }
 
 void Sets::on_checkBox_clicked(bool checked)
 {
+    logger->info("[Config Event] Set animteState ({}) -> ({})", animteState, checked);
     animteState = checked;
 }

@@ -8,13 +8,17 @@ PopupClock::PopupClock(QWidget *parent)
 
     // lcd时间初始化
     ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
+    logger->info("lcd number display INIT");
     // 设置定时器
+    logger->info("lcd number timer INIT");
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(SetNumClock()));
     timer->start(1000);
 
     // 设置窗口背景透明
     this->setAttribute(Qt::WA_TranslucentBackground, true);
+    logger->info("set window TranslucentBackground");
+
     // 设置窗口置顶
     this->TopSetWindow();
 }
@@ -37,11 +41,13 @@ void PopupClock::SetClockStatus(int px, int py, bool active, int speed, int ktim
     WeekList = W;
     m_x = px;
     m_y = py;
+    logger->info("SetClockStatus Pos({}, {}), MoveSpeed({}), KeepTime({})", px, py, speed, ktime);
 }
 
 void PopupClock::AnimateCtrl(bool active)
 {
     animateActive = active;
+    logger->info("Set AnimateCtrl [bool] {}", active);
 }
 
 void PopupClock::TopSetWindow()
@@ -52,16 +58,20 @@ void PopupClock::TopSetWindow()
     // other
 #endif
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint | Qt::ToolTip);
+    logger->info("show window");
     show();
     activateWindow();
+    logger->info("set window on the top layer");
 }
 
 void PopupClock::SetNumClock()
 {
+    // logger->info("[Number Timer] reset lcd number display");
     ui.lcdNumber->display(QTime::currentTime().toString("hh:mm:ss"));
 
     if (animateActive && WeekList != nullptr)
     {
+        // logger->info("[Number Timer] animateActive {} , check time list", animateActive);
         QDateTime current_date_time = QDateTime::currentDateTime();
         int curtime = current_date_time.toSecsSinceEpoch();
         QString current_week = current_date_time.toString("dddd");
@@ -89,6 +99,7 @@ void PopupClock::SetNumClock()
 
                         if (current_second == *i)
                         {
+                            logger->info("[Number Timer] Move start time {} {}:{}:{} , keepTime {}", std::string(current_week.toLocal8Bit()), std::string(current_hour.toLocal8Bit()), std::string(current_minute.toLocal8Bit()), std::string(current_second.toLocal8Bit()), keepTime);
                             MoveClock();
                             finishTime = curtime + keepTime;
                             break;
@@ -99,6 +110,7 @@ void PopupClock::SetNumClock()
         }
         if (curtime == finishTime)
         {
+            logger->info("[Number Timer] Move finish time {} {}:{}:{} , keepTime {}", std::string(current_week.toLocal8Bit()), std::string(current_hour.toLocal8Bit()), std::string(current_minute.toLocal8Bit()), std::string(current_second.toLocal8Bit()), keepTime);
             MoveClockback();
         }
     }
@@ -107,7 +119,8 @@ void PopupClock::SetNumClock()
 void PopupClock::MoveClock()
 {
     isPop = true;
-
+    logger->info("[ClockMove Action] start pop up, isPop({})", isPop);
+    logger->info("[ClockMove Action] Animation Start, speed({}), from({}, {}) to ({}, {})", moveSpeed, m_x - moveStep, m_y, m_x, m_y);
     QPropertyAnimation *m_pAnimation = &m_Animation0;
     m_pAnimation->setTargetObject(this);
     m_pAnimation->setPropertyName("pos");
@@ -124,11 +137,14 @@ void PopupClock::MoveClock()
     m_pAnimation2->setKeyValueAt(0.5, 1);
     m_pAnimation2->setKeyValueAt(1, 1);
     m_pAnimation2->start();
+    logger->info("[ClockMove Action] Animation Finish");
 }
 
 void PopupClock::MoveClockback()
 {
     isPop = false;
+    logger->info("[ClockMove Action] start push back, isPop({})", isPop);
+    logger->info("[ClockMove Action] Animation Start, speed({}), from({}, {}) to ({}, {})", moveSpeed, m_x, m_y, m_x - moveStep, m_y);
     QPropertyAnimation *m_pAnimation = &m_Animation0;
     m_pAnimation->setTargetObject(this);
     m_pAnimation->setPropertyName("pos");
@@ -144,6 +160,7 @@ void PopupClock::MoveClockback()
     m_pAnimation2->setKeyValueAt(0.5, 1);
     m_pAnimation2->setKeyValueAt(1, 0);
     m_pAnimation2->start();
+    logger->info("[ClockMove Action] Animation Finish");
 }
 void PopupClock::mousePressEvent(QMouseEvent *event)
 {
@@ -152,6 +169,9 @@ void PopupClock::mousePressEvent(QMouseEvent *event)
         tempState = animateActive;
         animateActive = false;
         last_mouse_position_ = event->globalPos();
+        logger->info("[Mouse Event] LeftButton Down, pos({}, {}), isPop({})", last_mouse_position_.x(), last_mouse_position_.y(), isPop);
+    }else{
+        logger->warn("[Mouse Event] event->button() : {}", event->button());
     }
 }
 
@@ -168,6 +188,7 @@ void PopupClock::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) // Left button...
     {
+        logger->info("[Mouse Event] LeftButton Up, pos({}, {}), isPop({})", last_mouse_position_.x(), last_mouse_position_.y(), isPop);
         animateActive = tempState;
         if (isPop)
         {
@@ -182,6 +203,7 @@ void PopupClock::mouseReleaseEvent(QMouseEvent *event)
         auto config = new QSettings(filePath, QSettings::IniFormat);
         config->setValue("Config/ClockX", m_x);
         config->setValue("Config/ClockY", m_y);
+        logger->info("[Config Event] Save Pos({}, {})", m_x, m_y);
         config->sync();
     }
 }
@@ -190,6 +212,7 @@ bool PopupClock::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj == this && event->type() == QEvent::WindowDeactivate)
     {
+        logger->info("[Window Event] WindowDeactivate");
         activateWindow();
     }
     return true;
@@ -201,6 +224,7 @@ void PopupClock::ShowClock()
     {
         if (animateActive)
         {
+            logger->info("[Window Event] ShowClock");
             MoveClock();
         }
     }
@@ -212,6 +236,7 @@ void PopupClock::HideClock()
     {
         if (animateActive)
         {
+            logger->info("[Window Event] HideClock");
             MoveClockback();
         }
     }

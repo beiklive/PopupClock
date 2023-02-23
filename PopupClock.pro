@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = PopupClock
 
-INCLUDEPATH += src
+INCLUDEPATH += src inc
 OBJECTS_DIR = build/obj/
 MOC_DIR = build/
 RCC_DIR = build/
@@ -37,7 +37,8 @@ HEADERS += \
     src/clock_settings.h \
     src/core_traymenu.h \
     src/core_operation.h \
-    src/DrawClock.h
+    src/DrawClock.h \
+    src/core_logger.hpp
 
 RESOURCES += \
     src/PopupClock.qrc

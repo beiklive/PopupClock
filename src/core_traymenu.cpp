@@ -9,9 +9,9 @@ gen::gen()
     mSysTrayIcon->setIcon(icon);
     mSysTrayIcon->setToolTip(("桀哥的时钟 仿"));
     mSysTrayIcon->show();
+    logger->info("[Tray Event] set icon and tooltip");
 
     auto m_menu = new QMenu();
-
     m_pActionAutoStart = new QAction(m_menu);
     m_pActionAutoStart->setText(("设置"));
     connect(m_pActionAutoStart, &QAction::triggered, this, &gen::ShowSetting);
@@ -22,12 +22,15 @@ gen::gen()
     m_menu->addAction(m_pActionExit);
     connect(m_pActionExit, &QAction::triggered, this, &QApplication::quit);
     mSysTrayIcon->setContextMenu(m_menu);
+    logger->info("[Tray Event] set menu action");
+
     clock = new PopupClock();
     settingUI.GetParent(clock);
 }
 
 void gen::ShowSetting()
 {
+    logger->info("[Tray Event] open setting widget");
     settingUI.show();
     clock->ShowClock();
 }

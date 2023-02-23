@@ -15,7 +15,8 @@
 #include <QList>
 #include "core_operation.h"
 #include "clock_settings.h"
-
+#include "core_logger.hpp"
+extern std::shared_ptr<spdlog::logger> logger;
 class gen : public QObject
 {
     Q_OBJECT

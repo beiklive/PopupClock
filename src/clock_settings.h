@@ -11,6 +11,8 @@
 #include <QStandardPaths>
 #include <QProcess>
 #include "core_operation.h"
+#include "core_logger.hpp"
+extern std::shared_ptr<spdlog::logger> logger;
 namespace Ui
 {
     class Sets;
@@ -29,11 +31,8 @@ protected:
     void closeEvent(QCloseEvent *);
 private slots:
     void on_BtnAutoStart_stateChanged(int arg1);
-
     void on_buttonBox_accepted();
-
     void on_buttonBox_rejected();
-
     void on_checkBox_clicked(bool checked);
 
 private:

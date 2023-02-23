@@ -6,6 +6,8 @@
 #include <QPainter>
 #include <QTime>
 #include <QTimer>
+#include "core_logger.hpp"
+extern std::shared_ptr<spdlog::logger> logger;
 class DrawClock : public QWidget
 {
     Q_OBJECT
@@ -18,7 +20,7 @@ private:
     static const QPoint hourHand[4];
     static const QPoint minuteHand[4];
     static const QPoint secondHand[4];
-    static const int paint_interval_ms{500};
+    const int paint_interval_ms{500};
     QTime time;
 
 protected:

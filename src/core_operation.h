@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QWidget>
 #include "ui_PopupClock.h"
+#include <QApplication>
 #include <QtGlobal>
 #include <QTimer>
 #include <QMouseEvent>
@@ -19,12 +20,13 @@
 #include <QStandardPaths>
 #include <QIcon>
 #include <QDebug>
-
+#include "core_logger.hpp"
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #else
 // Other operating systems
 #endif
+extern std::shared_ptr<spdlog::logger> logger;
 
 class PopupClock : public QWidget
 {

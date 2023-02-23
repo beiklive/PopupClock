@@ -5,6 +5,7 @@ DrawClock::DrawClock(QWidget *parent)
 {
     QTimer *timer = new QTimer(this);
     timer->start(paint_interval_ms);
+    logger->info("[clock Event] set clock timer {}ms", paint_interval_ms);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 }
 
