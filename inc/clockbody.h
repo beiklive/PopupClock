@@ -3,39 +3,8 @@
 
 #include "common.h"
 extern std::shared_ptr<spdlog::logger> logger;
-extern ConfigManager& Config;
 namespace
 {
-    struct ClockBodyStruct
-    {
-        int width;
-        int height;
-        QColor backgroundColor;
-        int borderRadius;
-    };
-    struct ClockDialStruct
-    {
-        int width;
-        int height;
-        QColor backgroundColor;
-        QColor secondHandColor;
-        QColor minuteHandColor;
-        QColor hourHandColor;
-        int positionX;
-        int positionY;
-    };
-    struct ClockNumberStruct
-    {
-        int width;
-        int height;
-        QColor backgroundColor;
-        int borderRadius;
-        int positionX;
-        int positionY;
-
-    
-    };
-
     const QPoint hourHand[4] = {
         QPoint(4, 0),
         QPoint(-4, 0),
@@ -72,15 +41,15 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 
-    void drawHourHand(QPainter *painter, QTime time);
-    void drawMinuteHand(QPainter *painter, QTime time);
-    void drawsecondHand(QPainter *painter, QTime time);
+    void drawHourHand(QPainter *painter, const QTime& time);
+    void drawMinuteHand(QPainter *painter, const QTime& time);
+    void drawsecondHand(QPainter *painter, const QTime& time);
     void drawBackgroud(QPainter *painter);
     void drawCentre(QPainter *painter);
 
-
-
 signals:
+    void mouseReleaseSignal(QPoint pos);
+    void mousePressSignal();
 
 private:
     int tClockBodyWidth = 280;

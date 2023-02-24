@@ -9,9 +9,6 @@ int main(int argc, char *argv[])
 {
     Config.LoadConfig(Logger::getInstance().QStringToString(kConfigPath));
     QApplication a(argc, argv);
-
-    logger->info("IPAddress: {}", Config.GetValue("IPAddress"));
-    
     TrayMenu w;
     return a.exec();
 }

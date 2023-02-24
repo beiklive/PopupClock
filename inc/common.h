@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _CLOCK_COMMON_H
+#define _CLOCK_COMMON_H
 
 #include <QWidget>
 #include <QtGlobal>
@@ -8,15 +8,21 @@
 #include <QAction>
 #include <QApplication>
 #include <QStandardPaths>
+#include <QStringList>
 #include <QString>
 #include <QPixmap>
+#include <QFile>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTime>
+#include <QDir>
+#include <QSettings>
+#include <QFileInfo>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QLCDNumber>
 #include <QPainterPath>
+#include <QPropertyAnimation>
 
 #include <iostream>
 #include <fstream>
@@ -29,7 +35,6 @@
 #include <unistd.h>
 #endif
 
-
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -37,6 +42,73 @@
 const QString kCachePath{QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PopupClock/"};
 const QString kConfigPath{QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/PopupClock/config.ini"};
 
+struct ClockBodyStruct
+{
+    int width;
+    int height;
+    QColor backgroundColor;
+    int borderRadius;
+};
+struct ClockDialStruct
+{
+    int width;
+    int height;
+    QColor backgroundColor;
+    QColor secondHandColor;
+    QColor minuteHandColor;
+    QColor hourHandColor;
+    int positionX;
+    int positionY;
+};
+struct ClockNumberStruct
+{
+    int width;
+    int height;
+    QColor backgroundColor;
+    int borderRadius;
+    int positionX;
+    int positionY;
+};
+struct ConfigStruct
+{
+    int positionX;
+    int positionY;
+    bool isAutoStartSet;
+    bool isAnimationSet;
+    int clockMoveSpeed;
+    int clockMoveInterval;
+    int clockMoveDistance;
+    QString secondList;
+    QString minuteList;
+    QString hourList;
+    QString dayList;
+};
+
+enum ClockBodyState
+{
+    CLOCKBODY_SHOW,
+    CLOCKBODY_HIDE,
+    CLOCKBODY_MOVE_TO_SHOW,
+    CLOCKBODY_MOVE_TO_HIDE
+};
+
+enum StateConditionGuard
+{
+    GUARD_OPEN,
+    GUARD_CLOSE
+};
+struct SettingStruct
+{
+    bool isAutoStartSet;
+    bool isAnimationSet;
+    int clockMoveSpeed;
+    int clockMoveInterval;
+    int clockMoveDistance;
+    QString secondList;
+    QString minuteList;
+    QString hourList;
+    QString dayList;
+};
 
 /* 配置文件管理类，单例模式，使用方法如下：
     ConfigManager& config = ConfigManager::Instance();
@@ -67,6 +139,7 @@ public:
             {
                 throw std::runtime_error("Failed to create config file!");
             }
+            m_isConfigFirstLoad = true;
             ofs.close();
             return;
         }
@@ -113,9 +186,16 @@ public:
         SyncFile(file);
     }
 
+    // 判断配置文件是否是第一次加载
+    const bool IsConfigFirstLoad() const
+    {
+        return m_isConfigFirstLoad;
+    }
+
 private:
     std::map<std::string, std::string> m_configs; // 存储配置项的键值对
     std::string m_configPath;
+    bool m_isConfigFirstLoad = false;
     ConfigManager() = default;                                // 禁止外部创建实例
     ConfigManager(const ConfigManager &) = delete;            // 禁止复制构造函数
     ConfigManager &operator=(const ConfigManager &) = delete; // 禁止复制赋值运算符
@@ -149,7 +229,7 @@ private:
         // 创建一个日志记录器，并将 rotating_file_sink 传递给它
         m_logger = std::make_shared<spdlog::logger>(kLoggerName, file_sink);
         // 设置日志级别为 debug
-        m_logger->set_level(spdlog::level::debug);
+        m_logger->set_level(spdlog::level::info);
         // 设置日志刷新间隔为 1 秒
         m_logger->flush_on(spdlog::level::trace);
         // 将日志同时打印到终端

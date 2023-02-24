@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>DDJ.ico</file>
         <file>DDJ.png</file>
+        <file>setting.jpg</file>
     </qresource>
 </RCC>

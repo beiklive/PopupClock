@@ -9,6 +9,7 @@
 
 extern std::shared_ptr<spdlog::logger> logger;
 extern ConfigManager& Config;
+
 class TrayMenu : public QWidget
 {
     Q_OBJECT
@@ -18,23 +19,55 @@ public:
     ~TrayMenu();
 
 public:
+// menu init
     void initTrayMenu();
     void initWidget();
     void initTrayIcon();
     void initTrayAction();
     void initTrayMenuAction();
 
-//slots:
+// menu action
     void showSettingMenu();
     void showClockBody();
     void quitApp();
+
+// config
+    void initConfig();
+    void saveAllConfig();
+
+// control clock
+    void startClockMoveAnimation(const StateConditionGuard &GUARD);
+    void stopClockMoveAnimation(const StateConditionGuard &GUARD);
+    void stopAllAnimation();
+    void restoreAllAnimation();
+    void initClockBodyState();
+    void moveClockBody(const int& x, const int& y);
+
+// setting ctrl
+    void initTime();
+    void SetAutoStart();
+    void SetAnimation();
+    void timeStringToTimeList(QString timeString, QList<QString> *timeList, const int& maxNum);
+    QString findWeekDayName(int index){return Weeks[index];}
+
+
+public slots:
+    void CheckTimeToCtrlClock();
+    void ClockPositionChanged(QPoint pos);
+    void ClockBodyClicked();
+
+    void settingInfoSlot(SettingStruct sets);
+
+signals:
+    void settingInfoSignal(SettingStruct sets);
 
 private:
     const QString ICON_PATH = "://DDJ.ico";
     const QString ICON_TOOLTIP = "桀哥的时钟 仿";
     const QString SETTING_ACTION_NAME = "设置";
     const QString QUIT_ACTION_NAME = "退出"; 
-
+    const QString AUTO_RUN = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+    const QString Weeks[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 private:
     QSystemTrayIcon *trayIcon;
@@ -42,7 +75,19 @@ private:
     QAction *showClockBodyAction;
     QAction *showSettingMenuAction;
     QAction *quitAppAction;
+    QList<QString> *SecondList = new QList<QString>;
+    QList<QString> *MinuteList = new QList<QString>;
+    QList<QString> *HourList = new QList<QString>;
+    QList<QString> *WeekList = new QList<QString>;
+
+    QPropertyAnimation* moveAnimation = nullptr;
+    QPropertyAnimation* opacityAnimation = nullptr;
     SettingMenu *settingMenu;
     ClockBody *clockBody;
+    ConfigStruct configInfo{
+        30, 70, false, false, 1500, 60, 350, "", "", "", ""
+    };
+    int finishTime = 0;
+    ClockBodyState clockBodyState = CLOCKBODY_SHOW;
 };
 #endif // TRAYMENU_H

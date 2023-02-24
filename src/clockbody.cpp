@@ -25,7 +25,7 @@ void ClockBody::initWidget()
 
 void ClockBody::paintEvent(QPaintEvent *event)
 {
-    auto time = QTime::currentTime();
+    QTime time = QTime::currentTime();
     drawClockBody(time);
     drawClockDial(time);
     drawClockNumber(time);
@@ -39,6 +39,8 @@ void ClockBody::mousePressEvent(QMouseEvent *event)
                      event->globalPos().x(), event->globalPos().y());
         dragPosition = event->globalPos() - frameGeometry().topLeft();
         event->accept();
+
+        emit mousePressSignal();
     }
 }
 
@@ -59,10 +61,12 @@ void ClockBody::mouseReleaseEvent(QMouseEvent *event)
                      event->globalPos().x(), event->globalPos().y());
         dragPosition = QPoint();
         event->accept();
+
+        emit mouseReleaseSignal(this->pos());
     }
 }
 
-void ClockBody::drawClockBody(const QTime& time)
+void ClockBody::drawClockBody(const QTime &time)
 {
     // logger->info("[ClockBody] drawClockBody");
     // 创建缓冲区
@@ -82,7 +86,7 @@ void ClockBody::drawClockBody(const QTime& time)
     painter.drawPixmap(0, 0, pixmap);
 }
 
-void ClockBody::drawClockDial(const QTime& time)
+void ClockBody::drawClockDial(const QTime &time)
 {
     // logger->info("[ClockBody] drawClockDial");
     // 创建一个大小与窗口相同的圆形缓冲区
@@ -108,7 +112,7 @@ void ClockBody::drawClockDial(const QTime& time)
     screenPainter.drawPixmap(targetRect, buffer, buffer.rect());
 }
 
-void ClockBody::drawHourHand(QPainter *painter, QTime time)
+void ClockBody::drawHourHand(QPainter *painter, const QTime &time)
 {
     painter->setBrush(clockDialInfo.hourHandColor);
     painter->setPen(clockDialInfo.hourHandColor);
@@ -117,7 +121,7 @@ void ClockBody::drawHourHand(QPainter *painter, QTime time)
     painter->drawConvexPolygon(hourHand, 4);
     painter->restore();
 }
-void ClockBody::drawMinuteHand(QPainter *painter, QTime time)
+void ClockBody::drawMinuteHand(QPainter *painter, const QTime &time)
 {
     painter->setBrush(clockDialInfo.minuteHandColor);
     painter->setPen(clockDialInfo.minuteHandColor);
@@ -126,7 +130,7 @@ void ClockBody::drawMinuteHand(QPainter *painter, QTime time)
     painter->drawConvexPolygon(minuteHand, 4);
     painter->restore();
 }
-void ClockBody::drawsecondHand(QPainter *painter, QTime time)
+void ClockBody::drawsecondHand(QPainter *painter, const QTime &time)
 {
     painter->setBrush(clockDialInfo.secondHandColor);
     painter->setPen(clockDialInfo.secondHandColor);
@@ -160,9 +164,9 @@ void ClockBody::drawCentre(QPainter *painter)
     painter->drawEllipse(-5, -5, 10, 10);
 }
 
-void ClockBody::drawClockNumber(const QTime& time)
+void ClockBody::drawClockNumber(const QTime &time)
 {
-        // 创建缓冲区
+    // 创建缓冲区
     QPixmap buffer(QSize(clockNumberInfo.width, clockNumberInfo.height));
     buffer.fill(Qt::transparent);
     // 创建一个QPainter对象，用于在QPixmap上绘制图形
@@ -183,7 +187,7 @@ void ClockBody::drawClockNumber(const QTime& time)
     // screenPainter.drawPixmap(rect(), buffer, rect);
     QRectF targetRect(clockNumberInfo.positionX, clockNumberInfo.positionY, buffer.width(), buffer.height());
     screenPainter.drawPixmap(targetRect, buffer, buffer.rect());
-    
+
     lcd->setGeometry(clockNumberInfo.positionX + 20, clockNumberInfo.positionY + 10, clockNumberInfo.width - 40, clockNumberInfo.height - 20);
     lcd->setDigitCount(8);
     lcd->setFrameStyle(QFrame::NoFrame);
@@ -191,5 +195,3 @@ void ClockBody::drawClockNumber(const QTime& time)
     lcd->setStyleSheet("color: black;");
     lcd->display(time.toString("hh:mm:ss"));
 }
-
-

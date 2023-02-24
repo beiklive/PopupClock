@@ -21,16 +21,20 @@ win32  {
 }
 
 SOURCES += \
-    src/main.cpp \
     src/settingmenu.cpp \
+    src/main.cpp \
     src/clockbody.cpp \
     src/traymenu.cpp
 
+
 HEADERS += \
-    inc/settingmenu.h \
     inc/clockbody.h \
     inc/traymenu.h \
-    inc/common.h
+    inc/common.h \
+    inc/settingmenu.h
 
 RESOURCES += \
     res/ImgSource.qrc
+
+FORMS += \
+    src/settingmenu.ui
