@@ -3,7 +3,7 @@
 
 #include "common.h"
 extern std::shared_ptr<spdlog::logger> logger;
-
+extern ConfigManager& Config;
 namespace
 {
     struct ClockBodyStruct
@@ -61,9 +61,9 @@ public:
     ~ClockBody();
 
     void initWidget();
-    void drawClockBody();
-    void drawClockDial();
-    void drawClockNumber();
+    void drawClockBody(const QTime& time);
+    void drawClockDial(const QTime& time);
+    void drawClockNumber(const QTime& time);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

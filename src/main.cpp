@@ -4,10 +4,14 @@
 
 
 std::shared_ptr<spdlog::logger> logger = Logger::getInstance().getLogger();
+ConfigManager& Config = ConfigManager::Instance();
 int main(int argc, char *argv[])
 {
-    logger->info("main");
+    Config.LoadConfig(Logger::getInstance().QStringToString(kConfigPath));
     QApplication a(argc, argv);
+
+    logger->info("IPAddress: {}", Config.GetValue("IPAddress"));
+    
     TrayMenu w;
     return a.exec();
 }

@@ -16,6 +16,7 @@
 #include <QtWidgets/QWidget>
 #include "common.h"
 extern std::shared_ptr<spdlog::logger> logger;
+extern ConfigManager& Config;
 class SettingMenu : public QWidget
 {
     Q_OBJECT

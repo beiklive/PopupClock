@@ -8,6 +8,7 @@
 #include "settingmenu.h"
 
 extern std::shared_ptr<spdlog::logger> logger;
+extern ConfigManager& Config;
 class TrayMenu : public QWidget
 {
     Q_OBJECT
