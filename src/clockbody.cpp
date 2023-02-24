@@ -1,0 +1,189 @@
+#include "clockbody.h"
+
+ClockBody::ClockBody(QWidget *parent)
+    : QWidget{parent}
+{
+    initWidget();
+    // 设置定时器，0.5秒update()一次
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [this]()
+            { this->update(); });
+    timer->start(500);
+}
+
+ClockBody::~ClockBody()
+{
+}
+
+void ClockBody::initWidget()
+{
+    logger->info("[ClockBody] initWidget");
+    this->setFixedSize(clockBodyInfo.width, clockBodyInfo.height);
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint | Qt::ToolTip);
+    this->setAttribute(Qt::WA_TranslucentBackground);
+}
+
+void ClockBody::paintEvent(QPaintEvent *event)
+{
+    drawClockBody();
+    drawClockDial();
+    drawClockNumber();
+}
+
+void ClockBody::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        logger->info("[ClockBody] mousePressEvent position: {}, {}",
+                     event->globalPos().x(), event->globalPos().y());
+        dragPosition = event->globalPos() - frameGeometry().topLeft();
+        event->accept();
+    }
+}
+
+void ClockBody::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton)
+    {
+        move(event->globalPos() - dragPosition);
+        event->accept();
+    }
+}
+
+void ClockBody::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        logger->info("[ClockBody] mouseReleaseEvent position: {}, {}",
+                     event->globalPos().x(), event->globalPos().y());
+        dragPosition = QPoint();
+        event->accept();
+    }
+}
+
+void ClockBody::drawClockBody()
+{
+    // logger->info("[ClockBody] drawClockBody");
+    // 创建缓冲区
+    QPixmap pixmap(QSize(clockBodyInfo.width, clockBodyInfo.height));
+    pixmap.fill(Qt::transparent);
+
+    // 在缓冲区中绘制图形
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setBrush(clockBodyInfo.backgroundColor);
+    painter.setPen(Qt::NoPen);
+    painter.drawRoundedRect(rect(), clockBodyInfo.borderRadius, clockBodyInfo.borderRadius);
+
+    // 将缓冲区绘制到窗口中
+    painter.end();
+    painter.begin(this);
+    painter.drawPixmap(0, 0, pixmap);
+}
+
+void ClockBody::drawClockDial()
+{
+    // logger->info("[ClockBody] drawClockDial");
+    // 创建一个大小与窗口相同的圆形缓冲区
+    QPixmap buffer(QSize(clockDialInfo.width, clockDialInfo.height));
+    buffer.fill(Qt::transparent);
+
+    // 在缓冲区中绘制图形
+    QPainter painter(&buffer);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.translate(clockDialInfo.width / 2, clockDialInfo.height / 2);
+    int size = qMin(clockDialInfo.width, clockDialInfo.height);
+    painter.scale(size / 220.0, size / 220.0);
+    auto time = QTime::currentTime();
+    drawBackgroud(&painter);
+    drawHourHand(&painter, time);
+    drawMinuteHand(&painter, time);
+    drawsecondHand(&painter, time);
+    drawCentre(&painter);
+
+    // 将缓冲区中的图形绘制到屏幕上
+    QPainter screenPainter(this);
+    screenPainter.setRenderHint(QPainter::Antialiasing, true);
+    QRectF targetRect(clockDialInfo.positionX, clockDialInfo.positionY, buffer.width(), buffer.height());
+    screenPainter.drawPixmap(targetRect, buffer, buffer.rect());
+}
+
+void ClockBody::drawHourHand(QPainter *painter, QTime time)
+{
+    painter->setBrush(clockDialInfo.hourHandColor);
+    painter->setPen(clockDialInfo.hourHandColor);
+    painter->rotate(30.0 * (time.hour() + time.minute() / 60.0) + time.second() / 3600.0);
+    painter->drawConvexPolygon(hourHand, 4);
+}
+void ClockBody::drawMinuteHand(QPainter *painter, QTime time)
+{
+    painter->setBrush(clockDialInfo.minuteHandColor);
+    painter->setPen(clockDialInfo.minuteHandColor);
+    painter->rotate(6.0 * (time.minute() + time.second() / 60.0));
+    painter->drawConvexPolygon(minuteHand, 4);
+}
+void ClockBody::drawsecondHand(QPainter *painter, QTime time)
+{
+    painter->setBrush(clockDialInfo.secondHandColor);
+    painter->setPen(clockDialInfo.secondHandColor);
+    painter->rotate(6.0 * time.second());
+    painter->drawConvexPolygon(secondHand, 4);
+}
+void ClockBody::drawBackgroud(QPainter *painter)
+{
+    painter->setBrush(Qt::black);
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    QRadialGradient radialGradient(QPointF(0, 0), 110, QPointF(0, 0));
+    radialGradient.setColorAt(1, clockDialInfo.backgroundColor);
+    radialGradient.setColorAt(0.9, clockDialInfo.backgroundColor);
+    radialGradient.setColorAt(0.89, clockDialInfo.backgroundColor);
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(radialGradient);
+    painter->drawEllipse(QPointF(0, 0), 110, 110);
+}
+
+void ClockBody::drawCentre(QPainter *painter)
+{
+    QConicalGradient coneGradient(0, 0, -90.0);
+    coneGradient.setColorAt(0.0, Qt::darkGray);
+    coneGradient.setColorAt(0.2, QColor(150, 150, 200));
+    coneGradient.setColorAt(0.5, Qt::white);
+    coneGradient.setColorAt(1.0, Qt::darkGray);
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(coneGradient);
+    painter->drawEllipse(-5, -5, 10, 10);
+}
+
+void ClockBody::drawClockNumber()
+{
+        // 创建缓冲区
+    QPixmap buffer(QSize(clockNumberInfo.width, clockNumberInfo.height));
+    buffer.fill(Qt::transparent);
+    // 创建一个QPainter对象，用于在QPixmap上绘制图形
+    QPainter bufferPainter(&buffer);
+    // 启用抗锯齿渲染
+    bufferPainter.setRenderHint(QPainter::Antialiasing, true);
+
+    // 在QPixmap上绘制长方形
+    QRect rect(0, 0, clockNumberInfo.width, clockNumberInfo.height);
+    QPainterPath path;
+    path.addRoundedRect(rect, clockNumberInfo.borderRadius, clockNumberInfo.borderRadius);
+    bufferPainter.setPen(Qt::NoPen);
+    bufferPainter.fillPath(path, QBrush(clockNumberInfo.backgroundColor));
+    bufferPainter.drawPath(path);
+
+    // 将绘制好的QPixmap绘制到屏幕上
+    QPainter screenPainter(this);
+    // screenPainter.drawPixmap(rect(), buffer, rect);
+    QRectF targetRect(clockNumberInfo.positionX, clockNumberInfo.positionY, buffer.width(), buffer.height());
+    screenPainter.drawPixmap(targetRect, buffer, buffer.rect());
+    
+    lcd->setGeometry(clockNumberInfo.positionX + 20, clockNumberInfo.positionY + 10, clockNumberInfo.width - 40, clockNumberInfo.height - 20);
+    lcd->setDigitCount(8);
+    lcd->setFrameStyle(QFrame::NoFrame);
+    lcd->setSegmentStyle(QLCDNumber::Flat);
+    lcd->setStyleSheet("color: black;");
+    lcd->display(QTime::currentTime().toString("hh:mm:ss"));
+}
+
+

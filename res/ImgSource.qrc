@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/PopupClock">
+    <qresource prefix="/">
         <file>DDJ.ico</file>
         <file>DDJ.png</file>
     </qresource>
