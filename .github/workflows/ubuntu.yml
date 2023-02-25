@@ -5,11 +5,13 @@ on:
     paths:
     - '*.pro'
     - 'src/**'
+    - 'inc/**'
     - '.github/workflows/ubuntu.yml'
   pull_request:
     paths:
     - '*.pro'
     - 'src/**'
+    - 'inc/**'
     - '.github/workflows/ubuntu.yml'
 jobs:
   build:
