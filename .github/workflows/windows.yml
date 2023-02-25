@@ -4,11 +4,13 @@ on:
     paths:
       - '*.pro'
       - 'src/**'
+      - 'inc/**'
       - '.github/workflows/windows.yml'
   pull_request:
     paths:
       - '*.pro'
       - 'src/**'
+      - 'inc/**'
       - '.github/workflows/windows.yml'
 jobs:
   build:
