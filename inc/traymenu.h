@@ -84,6 +84,10 @@ private:
     QList<QString> *HourList = new QList<QString>;
     QList<QString> *WeekList = new QList<QString>;
 
+    QList<QString> *SecondCloseList = new QList<QString>;
+    QList<QString> *MinuteCloseList = new QList<QString>;
+    QList<QString> *HourCloseList = new QList<QString>;
+    QList<QString> *WeekCloseList = new QList<QString>;
     QPropertyAnimation* moveAnimation = nullptr;
     QPropertyAnimation* opacityAnimation = nullptr;
     SettingMenu *settingMenu;
@@ -91,11 +95,10 @@ private:
     ConfigStruct configInfo{
         30, 70, false, false, 1500, 60, 350, "", "", "", ""
     };
-    int finishTime = 0;
     ClockBodyState clockBodyState = CLOCKBODY_SHOW;
     ClockBodyStateStruct m_clockBodyStateMachine{
         ClockBodyState::CLOCKBODY_SHOW,
-        ClockBodyState::CLOCKBODY_SHOW
+        ClockBodyState::CLOCKBODY_MOVE_TO_HIDE
     };
 };
 #endif // TRAYMENU_H

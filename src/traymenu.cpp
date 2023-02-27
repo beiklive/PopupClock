@@ -145,17 +145,13 @@ void TrayMenu::restoreAllAnimation()
 
 void TrayMenu::animationShowToHide(const StateConditionGuard &GUARD)
 {
-    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() != ClockBodyState::CLOCKBODY_HIDE))
+    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() == ClockBodyState::CLOCKBODY_MOVE_TO_HIDE))
     {
         logger->info("animationShowToHide");
         stopAllAnimation();
 
-        // 如果是强制隐藏，那么就不需要修改当前状态
-        if (GUARD)
-        {
-            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
-        }
-        
+        SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
+
 
         moveAnimation = new QPropertyAnimation(clockBody, "pos");
         moveAnimation->setDuration(configInfo.clockMoveSpeed);
@@ -184,21 +180,17 @@ void TrayMenu::animationShowToHide(const StateConditionGuard &GUARD)
 
 void TrayMenu::animationHideToShow(const StateConditionGuard &GUARD)
 {
-    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW))
+    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() == ClockBodyState::CLOCKBODY_MOVE_TO_SHOW))
     {
         logger->info("animationHideToShow");
 
         stopAllAnimation();
 
-        // 如果是强制显示，那么就不需要修改当前状态
-        if (GUARD)
-        {
-            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
-        }
+        SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
 
         moveAnimation = new QPropertyAnimation(clockBody, "pos");
         moveAnimation->setDuration(configInfo.clockMoveSpeed);
-        moveAnimation->setStartValue(this->pos());
+        moveAnimation->setStartValue(clockBody->pos());
         moveAnimation->setEndValue(QPoint(configInfo.positionX, configInfo.positionY));
         moveAnimation->start();
         connect(moveAnimation, &QPropertyAnimation::finished, [=]()
@@ -385,6 +377,7 @@ void TrayMenu::SetAnimation()
     {
         if (GetClockBodyCurState() == CLOCKBODY_HIDE || GetClockBodyCurState() == CLOCKBODY_MOVE_TO_HIDE)
         {
+            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
             animationHideToShow(StateConditionGuard::GUARD_CLOSE);
         }
     }
@@ -392,15 +385,22 @@ void TrayMenu::SetAnimation()
 
 
 // ==============================================================
-// 初始化时间列表
+// 初始化时间列表和结束时间列表
 // ==============================================================
 void TrayMenu::initTime()
 {
     logger->info("[initTime] init time");
+    if (configInfo.isAnimationSet)
+    {
     timeStringToTimeList(configInfo.secondList, SecondList, 60);
     timeStringToTimeList(configInfo.minuteList, MinuteList, 60);
     timeStringToTimeList(configInfo.hourList, HourList, 24);
     timeStringToTimeList(configInfo.dayList, WeekList, 7);
+
+    SecondCloseList->clear();
+    MinuteCloseList->clear();
+    HourCloseList->clear();
+    WeekCloseList->clear();
 
     for (auto i = WeekList->begin(); i != WeekList->end(); i++)
     {
@@ -411,10 +411,74 @@ void TrayMenu::initTime()
                 for (auto l = SecondList->begin(); l != SecondList->end(); l++)
                 {
                     QString time = *i + " " + *j + ":" + *k + ":" + *l;
-                    logger->debug("[initTime] time: " + time.toStdString());
+                    logger->info("[initTime] time: " + time.toStdString());
+
+                    if("xx" == *l){
+                        logger->error("[initTime] second is none ");
+                    }else{
+                        int second = (*l).toInt();
+                        int finalSecond = second + configInfo.clockMoveInterval;
+                        if(finalSecond >= 60){
+                            finalSecond = finalSecond - 60;
+                            if("xx" == *k){
+                                logger->debug("[initTime] minute is none, do nothing");
+                            }else{
+                                int minute = (*k).toInt();
+                                int finalMinute = minute + 1;
+                                if(finalMinute >= 60){
+                                    finalMinute = finalMinute - 60;
+                                    if("xx" == *j){
+                                        logger->debug("[initTime] hour is none, do nothing");
+                                    }else{
+                                        int hour = (*j).toInt();
+                                        int finalHour = hour + 1;
+                                        if(finalHour >= 24){
+                                            finalHour = finalHour - 24;
+                                            if("xx" == *i){
+                                                logger->debug("[initTime] day is none, do nothing");
+                                            }else{
+                                                int day = (*i).toInt();
+                                                int finalDay = day + 1;
+                                                if(finalDay >= 7){
+                                                    finalDay = finalDay - 7;
+                                                }
+                                                QString finalTime = findWeekDayName(finalDay) + " " + QString::number(finalHour) + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
+                                                logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                                SecondCloseList->append(QString::number(finalSecond));
+                                                MinuteCloseList->append(QString::number(finalMinute));
+                                                HourCloseList->append(QString::number(finalHour));
+                                                WeekCloseList->append(findWeekDayName(finalDay));
+                                            }
+                                        }else{
+                                            QString finalTime = *i + " " + QString::number(finalHour) + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
+                                            logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                            SecondCloseList->append(QString::number(finalSecond));
+                                            MinuteCloseList->append(QString::number(finalMinute));
+                                            HourCloseList->append(QString::number(finalHour));
+                                            WeekCloseList->append(*i);
+                                        }
+                                    }
+                                }else{
+                                    QString finalTime = *i + " " + *j + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
+                                    logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                    SecondCloseList->append(QString::number(finalSecond));
+                                    MinuteCloseList->append(QString::number(finalMinute));
+                                    HourCloseList->append(*j);
+                                }
+                            }
+                        }else{
+                            QString finalTime = *i + " " + *j + ":" + *k + ":" + QString::number(finalSecond);
+                            logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                            SecondCloseList->append(QString::number(finalSecond));
+                            MinuteCloseList->append(*k);
+                            HourCloseList->append(*j);
+                            WeekCloseList->append(*i);
+                        }
+                    }
                 }
             }
         }
+    }
     }
 }
 
@@ -465,7 +529,6 @@ void TrayMenu::CheckTimeToCtrlClock()
     if (configInfo.isAnimationSet)
     {
         QDateTime current_date_time = QDateTime::currentDateTime();
-        logger->debug("[CheckTimeToCtrlClock] check time to control clock = {}", current_date_time.toString("dddd hh:mm:ss").toStdString());
         int curtime = current_date_time.toSecsSinceEpoch();
         QString current_week = current_date_time.toString("dddd");
         QString current_hour = current_date_time.toString("hh");
@@ -479,17 +542,14 @@ void TrayMenu::CheckTimeToCtrlClock()
                 logger->debug("current_week = {}, find = {}", current_week.toStdString(), findWeekDayName((*k).toInt()).toStdString());
                 if (current_week == *k)
                 {
-                    logger->debug("time to move clock | current_week");
                     for (auto j = HourList->begin(); j != HourList->end(); j++)
                     {
                         if (current_hour == *j || "xx" == *j)
                         {
-                            logger->debug("time to move clock | current_hour");
                             for (auto l = MinuteList->begin(); l != MinuteList->end(); l++)
                             {
                                 if (current_minute == *l || "xx" == *l)
                                 {
-                                    logger->debug("time to move clock | current_minute");
                                     for (auto i = SecondList->begin(); i != SecondList->end(); i++)
                                     {
                                         if (current_second == *i || "xx" == *i)
@@ -497,8 +557,7 @@ void TrayMenu::CheckTimeToCtrlClock()
                                             logger->debug("time to move clock = {}", current_date_time.toString("dddd hh:mm:ss").toStdString());
                                             SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
                                             animationHideToShow(StateConditionGuard::GUARD_OPEN);
-                                            finishTime = curtime + configInfo.clockMoveInterval;
-                                            break;
+                                            return;
                                         }
                                     }
                                 }
@@ -510,10 +569,33 @@ void TrayMenu::CheckTimeToCtrlClock()
         }
         if(GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW)
         {
-            if (curtime == finishTime)
+            for (auto k = WeekCloseList->begin(); k != WeekCloseList->end(); k++)
             {
-                SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
-                animationShowToHide(StateConditionGuard::GUARD_OPEN);
+                if (current_week == *k)
+                {
+                    for (auto j = HourCloseList->begin(); j != HourCloseList->end(); j++)
+                    {
+                        if (current_hour == *j || "xx" == *j)
+                        {
+                            for (auto l = MinuteCloseList->begin(); l != MinuteCloseList->end(); l++)
+                            {
+                                if (current_minute == *l || "xx" == *l)
+                                {
+                                    for (auto i = SecondCloseList->begin(); i != SecondCloseList->end(); i++)
+                                    {
+                                        if (current_second == *i || "xx" == *i)
+                                        {
+                                            logger->info("time to back clock = {}", current_date_time.toString("dddd hh:mm:ss").toStdString());
+                                            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
+                                            animationShowToHide(StateConditionGuard::GUARD_OPEN);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
