@@ -36,8 +36,8 @@ public:
     void saveAllConfig();
 
 // control clock
-    void startClockMoveAnimation(const StateConditionGuard &GUARD);
-    void stopClockMoveAnimation(const StateConditionGuard &GUARD);
+    void animationShowToHide(const StateConditionGuard &GUARD);
+    void animationHideToShow(const StateConditionGuard &GUARD);
     void stopAllAnimation();
     void restoreAllAnimation();
     void initClockBodyState();
@@ -50,6 +50,10 @@ public:
     void timeStringToTimeList(QString timeString, QList<QString> *timeList, const int& maxNum);
     QString findWeekDayName(int index){return Weeks[index];}
 
+// state machine
+    void SetClockBodyCurState(const ClockBodyState& state);
+    const ClockBodyState GetClockBodyCurState();
+    const ClockBodyState GetClockBodyTargetState();
 
 public slots:
     void CheckTimeToCtrlClock();
@@ -89,5 +93,9 @@ private:
     };
     int finishTime = 0;
     ClockBodyState clockBodyState = CLOCKBODY_SHOW;
+    ClockBodyStateStruct m_clockBodyStateMachine{
+        ClockBodyState::CLOCKBODY_SHOW,
+        ClockBodyState::CLOCKBODY_SHOW
+    };
 };
 #endif // TRAYMENU_H

@@ -19,7 +19,7 @@ void TrayMenu::initTrayMenu()
 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(CheckTimeToCtrlClock()));
-    timer->start(400);
+    timer->start(900);
 
     showClockBody();
 }
@@ -103,7 +103,7 @@ void TrayMenu::moveClockBody(const int &x, const int &y)
 
 void TrayMenu::stopAllAnimation()
 {
-    logger->info("current state: {}", clockBodyState);
+    logger->info("current state: {}", GetClockBodyCurState());
     if (moveAnimation != nullptr)
     {
         moveAnimation->stop();
@@ -120,7 +120,7 @@ void TrayMenu::stopAllAnimation()
 
 void TrayMenu::restoreAllAnimation()
 {
-    switch (clockBodyState)
+    switch (GetClockBodyCurState())
     {
     case ClockBodyState::CLOCKBODY_SHOW:
         /* code */
@@ -129,39 +129,45 @@ void TrayMenu::restoreAllAnimation()
         /* code */
         break;
     case ClockBodyState::CLOCKBODY_MOVE_TO_SHOW:
+        // 因为主坐标是show的坐标，所以在hide或者hide to show的时候，需要把拿到的坐标做一下偏移
         configInfo.positionX += configInfo.clockMoveDistance;
         Config.SetValue("positionX", std::to_string(configInfo.positionX));
         Config.SaveConfig();
-        clockBodyState = ClockBodyState::CLOCKBODY_SHOW;
-        stopClockMoveAnimation(StateConditionGuard::GUARD_CLOSE);
+        animationHideToShow(StateConditionGuard::GUARD_OPEN);
         break;
     case ClockBodyState::CLOCKBODY_MOVE_TO_HIDE:
-        clockBodyState = ClockBodyState::CLOCKBODY_HIDE;
-        startClockMoveAnimation(StateConditionGuard::GUARD_CLOSE);
+        animationShowToHide(StateConditionGuard::GUARD_OPEN);
         break;
     default:
         break;
     }
 }
 
-void TrayMenu::startClockMoveAnimation(const StateConditionGuard &GUARD)
+void TrayMenu::animationShowToHide(const StateConditionGuard &GUARD)
 {
-    if ((configInfo.isAnimationSet && (clockBodyState == ClockBodyState::CLOCKBODY_SHOW)) || GUARD)
+    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() != ClockBodyState::CLOCKBODY_HIDE))
     {
-        logger->info("startClockMoveAnimation");
+        logger->info("animationShowToHide");
         stopAllAnimation();
-        logger->info("state changed to CLOCKBODY_MOVE_TO_HIDE");
-        clockBodyState = ClockBodyState::CLOCKBODY_MOVE_TO_HIDE;
+
+        // 如果是强制隐藏，那么就不需要修改当前状态
+        if (GUARD)
+        {
+            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
+        }
+        
+
         moveAnimation = new QPropertyAnimation(clockBody, "pos");
         moveAnimation->setDuration(configInfo.clockMoveSpeed);
-        moveAnimation->setStartValue(QPoint(configInfo.positionX, configInfo.positionY));
+        moveAnimation->setStartValue(clockBody->pos());
         moveAnimation->setEndValue(QPoint(configInfo.positionX - configInfo.clockMoveDistance, configInfo.positionY));
         moveAnimation->start();
-        connect(moveAnimation, &QPropertyAnimation::finished, [=]()
-                {
-        logger->info("moveAnimation finished");
-        clockBodyState = ClockBodyState::CLOCKBODY_HIDE;
-        delete moveAnimation; moveAnimation = nullptr; });
+        connect(moveAnimation, &QPropertyAnimation::finished, [=](){
+                    logger->info("moveAnimation finished");
+                    SetClockBodyCurState(GetClockBodyTargetState());
+                    delete moveAnimation;
+                    moveAnimation = nullptr;
+                });
 
         opacityAnimation = new QPropertyAnimation(clockBody, "windowOpacity");
         opacityAnimation->setDuration(configInfo.clockMoveSpeed);
@@ -169,37 +175,39 @@ void TrayMenu::startClockMoveAnimation(const StateConditionGuard &GUARD)
         opacityAnimation->setKeyValueAt(0.5, 1);
         opacityAnimation->setKeyValueAt(1, 0);
         opacityAnimation->start();
-        connect(opacityAnimation, &QPropertyAnimation::finished, [=]()
-                {
-        logger->info("opacityAnimation finished");
-        logger->info("state changed to CLOCKBODY_HIDE");
-        clockBodyState = ClockBodyState::CLOCKBODY_HIDE;
-        delete opacityAnimation; opacityAnimation = nullptr; });
+        connect(opacityAnimation, &QPropertyAnimation::finished, [=](){
+                    delete opacityAnimation; 
+                    opacityAnimation = nullptr; 
+                });
     }
 }
 
-void TrayMenu::stopClockMoveAnimation(const StateConditionGuard &GUARD)
+void TrayMenu::animationHideToShow(const StateConditionGuard &GUARD)
 {
-    if ((configInfo.isAnimationSet && (clockBodyState == ClockBodyState::CLOCKBODY_HIDE)) || GUARD)
+    if (GUARD || (configInfo.isAnimationSet && GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW))
     {
-
-        logger->info("stopClockMoveAnimation");
+        logger->info("animationHideToShow");
 
         stopAllAnimation();
 
-        logger->info("state changed to CLOCKBODY_MOVE_TO_SHOW");
-        clockBodyState = ClockBodyState::CLOCKBODY_MOVE_TO_SHOW;
+        // 如果是强制显示，那么就不需要修改当前状态
+        if (GUARD)
+        {
+            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
+        }
+
         moveAnimation = new QPropertyAnimation(clockBody, "pos");
         moveAnimation->setDuration(configInfo.clockMoveSpeed);
-        moveAnimation->setStartValue(QPoint(configInfo.positionX - configInfo.clockMoveDistance, configInfo.positionY));
+        moveAnimation->setStartValue(this->pos());
         moveAnimation->setEndValue(QPoint(configInfo.positionX, configInfo.positionY));
         moveAnimation->start();
         connect(moveAnimation, &QPropertyAnimation::finished, [=]()
                 {
-        logger->info("moveAnimation finished");
-        clockBodyState = ClockBodyState::CLOCKBODY_SHOW;
-        delete moveAnimation;
-        moveAnimation = nullptr; });
+                    logger->info("moveAnimation finished");
+                    SetClockBodyCurState(GetClockBodyTargetState());
+                    delete moveAnimation;
+                    moveAnimation = nullptr; 
+                });
 
         opacityAnimation = new QPropertyAnimation(clockBody, "windowOpacity");
         opacityAnimation->setDuration(configInfo.clockMoveSpeed);
@@ -209,14 +217,13 @@ void TrayMenu::stopClockMoveAnimation(const StateConditionGuard &GUARD)
         opacityAnimation->start();
         connect(opacityAnimation, &QPropertyAnimation::finished, [=]()
                 {
-        logger->info("opacityAnimation finished");
-        logger->info("state changed to CLOCKBODY_SHOW");
-        clockBodyState = ClockBodyState::CLOCKBODY_SHOW;
-        delete opacityAnimation; 
-        opacityAnimation = nullptr; });
+                    delete opacityAnimation; 
+                    opacityAnimation = nullptr; 
+                });
     }
 }
 
+// ===================读取配置文件===================
 void TrayMenu::initConfig()
 {
     if (Config.IsConfigFirstLoad())
@@ -251,15 +258,28 @@ void TrayMenu::initConfig()
     logger->info("[initConfig] hourList: " + configInfo.hourList.toStdString());
     logger->info("[initConfig] dayList: " + configInfo.dayList.toStdString());
 
+    // 绑定托盘与设置界面的信号和槽函数
     connect(this, &TrayMenu::settingInfoSignal, settingMenu, &SettingMenu::setSettingStructSlot);
     connect(settingMenu, &SettingMenu::settingInfoSignal, this, &TrayMenu::settingInfoSlot);
+    // 发送信号，将配置信息传递给设置界面
     emit settingInfoSignal({configInfo.isAutoStartSet, configInfo.isAnimationSet, configInfo.clockMoveSpeed, configInfo.clockMoveInterval, configInfo.clockMoveDistance, configInfo.secondList, configInfo.minuteList, configInfo.hourList, configInfo.dayList});
+    
+    // 检查是否设置了开机自启
     SetAutoStart();
+
+    // 初始化时钟列表
     initTime();
-    startClockMoveAnimation(StateConditionGuard::GUARD_OPEN);
+
+    // 绑定时钟的信号和槽函数
     initClockBodyState();
+
+    // 播放一个时钟消失的动画，表示时钟初始化完成
+    animationShowToHide(StateConditionGuard::GUARD_OPEN);
+
 }
 
+
+// ==================== 保存配置 ====================
 void TrayMenu::saveAllConfig()
 {
     Config.SetValue("positionX", std::to_string(configInfo.positionX));
@@ -276,6 +296,11 @@ void TrayMenu::saveAllConfig()
     Config.SaveConfig();
 }
 
+// ==============================================================
+// 鼠标松开
+// 功能： 1. 保存时钟位置 2. 恢复所有动画
+// ==============================================================
+
 void TrayMenu::ClockPositionChanged(QPoint pos)
 {
     logger->info("[ClockPositionChanged] pos.x: " + std::to_string(pos.x()));
@@ -289,6 +314,10 @@ void TrayMenu::ClockPositionChanged(QPoint pos)
     restoreAllAnimation();
 }
 
+// ==============================================================
+// 时钟被点击、时钟被拖动
+// 功能： 1. 停止所有动画
+// ==============================================================
 void TrayMenu::ClockBodyClicked()
 {
     logger->info("[ClockBodyClicked]");
@@ -298,6 +327,10 @@ void TrayMenu::ClockBodyClicked()
     }
 }
 
+// ==============================================================
+// 设置槽函数
+// 把设置菜单传来的设置信息保存到配置文件中
+// ==============================================================
 void TrayMenu::settingInfoSlot(SettingStruct sets)
 {
     logger->info("[settingInfoSlot] get setting info");
@@ -316,6 +349,9 @@ void TrayMenu::settingInfoSlot(SettingStruct sets)
     initTime();
 }
 
+// ==============================================================
+// 设置自启动
+// ==============================================================
 void TrayMenu::SetAutoStart()
 {
     logger->info("[SetAutoStart] set auto start {}", configInfo.isAutoStartSet ? "true" : "false");
@@ -336,19 +372,28 @@ void TrayMenu::SetAutoStart()
         settings.remove(name);
     }
 }
-
+// ==============================================================
+// 设置动画
+// 当动画功能设置为关闭时，
+// 如果当前时钟状态为隐藏或者正在移动到隐藏状态，则启动动画从隐藏到显示
+// 如果当前时钟状态为显示或者正在移动到显示状态，则不做任何操作
+// ==============================================================
 void TrayMenu::SetAnimation()
 {
     logger->info("[SetAnimation] set animation {}", configInfo.isAnimationSet ? "true" : "false");
     if (!configInfo.isAnimationSet)
     {
-        if (clockBodyState == CLOCKBODY_HIDE || clockBodyState == CLOCKBODY_MOVE_TO_HIDE)
+        if (GetClockBodyCurState() == CLOCKBODY_HIDE || GetClockBodyCurState() == CLOCKBODY_MOVE_TO_HIDE)
         {
-            stopClockMoveAnimation(StateConditionGuard::GUARD_CLOSE);
+            animationHideToShow(StateConditionGuard::GUARD_CLOSE);
         }
     }
 }
 
+
+// ==============================================================
+// 初始化时间列表
+// ==============================================================
 void TrayMenu::initTime()
 {
     logger->info("[initTime] init time");
@@ -373,14 +418,18 @@ void TrayMenu::initTime()
     }
 }
 
+// ==============================================================
+// 将时间字符串转换为时间列表
+// 功能：1. 解析时间字符串，将时间字符串转换为时间列表 2. 如果时间字符串为空，则初始化时间列表为默认值 xx
+// ==============================================================
 void TrayMenu::timeStringToTimeList(QString timeString, QList<QString> *timeList, const int &maxNum)
 {
     timeList->clear();
-    if (timeString.isEmpty())
+    if (timeString.isEmpty())   // 如果时间字符串为空，则初始化时间列表为默认值 xx, 且不重复保存
     {
         for (size_t i = 0; i < maxNum; i++)
         {
-            if (7 == maxNum)
+            if (7 == maxNum)  // 如果是星期列表，则将数字转换为星期名称
             {
                 timeList->append(findWeekDayName(i));
             }
@@ -396,7 +445,7 @@ void TrayMenu::timeStringToTimeList(QString timeString, QList<QString> *timeList
         QStringList timeListString = timeString.split(" ");
         for (auto i = timeListString.begin(); i != timeListString.end(); i++)
         {
-            if (7 == maxNum)
+            if (7 == maxNum)    
             {
                 timeList->append(findWeekDayName((*i).toInt()));
             }
@@ -408,6 +457,9 @@ void TrayMenu::timeStringToTimeList(QString timeString, QList<QString> *timeList
     }
 }
 
+// ==============================================================
+// 检查时间是否在时间列表中
+// ==============================================================
 void TrayMenu::CheckTimeToCtrlClock()
 {
     if (configInfo.isAnimationSet)
@@ -420,31 +472,34 @@ void TrayMenu::CheckTimeToCtrlClock()
         QString current_minute = current_date_time.toString("mm");
         QString current_second = current_date_time.toString("ss");
 
-        for (auto k = WeekList->begin(); k != WeekList->end(); k++)
+        if(GetClockBodyCurState() == ClockBodyState::CLOCKBODY_HIDE)
         {
-            logger->debug("current_week = {}, find = {}", current_week.toStdString(), findWeekDayName((*k).toInt()).toStdString());
-            if (current_week == *k)
+            for (auto k = WeekList->begin(); k != WeekList->end(); k++)
             {
-                logger->debug("time to move clock | current_week");
-                for (auto j = HourList->begin(); j != HourList->end(); j++)
+                logger->debug("current_week = {}, find = {}", current_week.toStdString(), findWeekDayName((*k).toInt()).toStdString());
+                if (current_week == *k)
                 {
-                    if (current_hour == *j || "xx" == *j)
+                    logger->debug("time to move clock | current_week");
+                    for (auto j = HourList->begin(); j != HourList->end(); j++)
                     {
-                        logger->debug("time to move clock | current_hour");
-                        for (auto l = MinuteList->begin(); l != MinuteList->end(); l++)
+                        if (current_hour == *j || "xx" == *j)
                         {
-                            if (current_minute == *l || "xx" == *l)
+                            logger->debug("time to move clock | current_hour");
+                            for (auto l = MinuteList->begin(); l != MinuteList->end(); l++)
                             {
-                                logger->debug("time to move clock | current_minute");
-                                for (auto i = SecondList->begin(); i != SecondList->end(); i++)
+                                if (current_minute == *l || "xx" == *l)
                                 {
-
-                                    if (current_second == *i || "xx" == *i)
+                                    logger->debug("time to move clock | current_minute");
+                                    for (auto i = SecondList->begin(); i != SecondList->end(); i++)
                                     {
-                                        logger->debug("time to move clock = {}", current_date_time.toString("dddd hh:mm:ss").toStdString());
-                                        stopClockMoveAnimation(StateConditionGuard::GUARD_OPEN);
-                                        finishTime = curtime + configInfo.clockMoveInterval;
-                                        break;
+                                        if (current_second == *i || "xx" == *i)
+                                        {
+                                            logger->debug("time to move clock = {}", current_date_time.toString("dddd hh:mm:ss").toStdString());
+                                            SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_SHOW);
+                                            animationHideToShow(StateConditionGuard::GUARD_OPEN);
+                                            finishTime = curtime + configInfo.clockMoveInterval;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -453,10 +508,31 @@ void TrayMenu::CheckTimeToCtrlClock()
                 }
             }
         }
-        if (curtime == finishTime)
+        if(GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW)
         {
-            logger->info("time to move clock back");
-            startClockMoveAnimation(StateConditionGuard::GUARD_OPEN);
+            if (curtime == finishTime)
+            {
+                SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
+                animationShowToHide(StateConditionGuard::GUARD_OPEN);
+            }
         }
     }
+}
+
+
+void TrayMenu::SetClockBodyCurState(const ClockBodyState &state)
+{
+    m_clockBodyStateMachine.currentState = state;
+    m_clockBodyStateMachine.targetState = static_cast<ClockBodyState>((state + 1) % sizeof(ClockBodyState));
+    logger->info("state changed to {}", state);
+}
+
+const ClockBodyState TrayMenu::GetClockBodyCurState()
+{
+    return m_clockBodyStateMachine.currentState;
+}
+
+const ClockBodyState TrayMenu::GetClockBodyTargetState()
+{
+    return m_clockBodyStateMachine.targetState;
 }

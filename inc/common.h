@@ -86,10 +86,16 @@ struct ConfigStruct
 
 enum ClockBodyState
 {
-    CLOCKBODY_SHOW,
-    CLOCKBODY_HIDE,
     CLOCKBODY_MOVE_TO_SHOW,
-    CLOCKBODY_MOVE_TO_HIDE
+    CLOCKBODY_SHOW,
+    CLOCKBODY_MOVE_TO_HIDE,
+    CLOCKBODY_HIDE
+};
+
+struct ClockBodyStateStruct
+{
+    ClockBodyState currentState;
+    ClockBodyState targetState;
 };
 
 enum StateConditionGuard

@@ -21,14 +21,20 @@ void ClockBody::initWidget()
     this->setFixedSize(clockBodyInfo.width, clockBodyInfo.height);
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint | Qt::ToolTip);
     this->setAttribute(Qt::WA_TranslucentBackground);
+
+    lcd->setGeometry(clockNumberInfo.positionX + 20, clockNumberInfo.positionY + 10, clockNumberInfo.width - 40, clockNumberInfo.height - 20);
+    lcd->setDigitCount(8);
+    lcd->setFrameStyle(QFrame::NoFrame);
+    lcd->setSegmentStyle(QLCDNumber::Flat);
+    lcd->setStyleSheet("color: black;");
 }
 
 void ClockBody::paintEvent(QPaintEvent *event)
 {
     QTime time = QTime::currentTime();
-    drawClockBody(time);
-    drawClockDial(time);
-    drawClockNumber(time);
+     drawClockBody(time);
+     drawClockDial(time);
+     drawClockNumber(time);
 }
 
 void ClockBody::mousePressEvent(QMouseEvent *event)
@@ -188,10 +194,6 @@ void ClockBody::drawClockNumber(const QTime &time)
     QRectF targetRect(clockNumberInfo.positionX, clockNumberInfo.positionY, buffer.width(), buffer.height());
     screenPainter.drawPixmap(targetRect, buffer, buffer.rect());
 
-    lcd->setGeometry(clockNumberInfo.positionX + 20, clockNumberInfo.positionY + 10, clockNumberInfo.width - 40, clockNumberInfo.height - 20);
-    lcd->setDigitCount(8);
-    lcd->setFrameStyle(QFrame::NoFrame);
-    lcd->setSegmentStyle(QLCDNumber::Flat);
-    lcd->setStyleSheet("color: black;");
+
     lcd->display(time.toString("hh:mm:ss"));
 }
