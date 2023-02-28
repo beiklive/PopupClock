@@ -419,21 +419,21 @@ void TrayMenu::initTime()
                         int second = (*l).toInt();
                         int finalSecond = second + configInfo.clockMoveInterval;
                         if(finalSecond >= 60){
-                            finalSecond = finalSecond - 60;
+                            finalSecond = finalSecond % 60;
                             if("xx" == *k){
                                 logger->debug("[initTime] minute is none, do nothing");
                             }else{
                                 int minute = (*k).toInt();
                                 int finalMinute = minute + 1;
                                 if(finalMinute >= 60){
-                                    finalMinute = finalMinute - 60;
+                                    finalMinute = finalMinute % 60;
                                     if("xx" == *j){
                                         logger->debug("[initTime] hour is none, do nothing");
                                     }else{
                                         int hour = (*j).toInt();
                                         int finalHour = hour + 1;
                                         if(finalHour >= 24){
-                                            finalHour = finalHour - 24;
+                                            finalHour = finalHour % 24;
                                             if("xx" == *i){
                                                 logger->debug("[initTime] day is none, do nothing");
                                             }else{
