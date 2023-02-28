@@ -19,6 +19,8 @@ public:
     ~TrayMenu();
 
 public:
+    void appRestart();
+
 // menu init
     void initTrayMenu();
     void initWidget();

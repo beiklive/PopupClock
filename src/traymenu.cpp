@@ -5,7 +5,15 @@ TrayMenu::TrayMenu(QWidget *parent)
 {
     initTrayMenu();
 }
-
+void TrayMenu::appRestart()
+{
+    logger->info("appRestart");
+    const QString program = QCoreApplication::applicationFilePath();
+    const QStringList arguments = QCoreApplication::arguments();
+    const QString directory = QDir::currentPath();
+    QCoreApplication::exit();
+    QProcess::startDetached(program, arguments, directory);
+}
 // void initTrayMenu()
 void TrayMenu::initTrayMenu()
 {
@@ -76,6 +84,8 @@ void TrayMenu::showClockBody()
 {
     logger->info("showClockBody");
     clockBody->show();
+    SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
+    animationShowToHide(StateConditionGuard::GUARD_OPEN);
 }
 
 // void quitApp()
@@ -152,18 +162,17 @@ void TrayMenu::animationShowToHide(const StateConditionGuard &GUARD)
 
         SetClockBodyCurState(ClockBodyState::CLOCKBODY_MOVE_TO_HIDE);
 
-
         moveAnimation = new QPropertyAnimation(clockBody, "pos");
         moveAnimation->setDuration(configInfo.clockMoveSpeed);
         moveAnimation->setStartValue(clockBody->pos());
         moveAnimation->setEndValue(QPoint(configInfo.positionX - configInfo.clockMoveDistance, configInfo.positionY));
         moveAnimation->start();
-        connect(moveAnimation, &QPropertyAnimation::finished, [=](){
+        connect(moveAnimation, &QPropertyAnimation::finished, [=]()
+                {
                     logger->info("moveAnimation finished");
                     SetClockBodyCurState(GetClockBodyTargetState());
                     delete moveAnimation;
-                    moveAnimation = nullptr;
-                });
+                    moveAnimation = nullptr; });
 
         opacityAnimation = new QPropertyAnimation(clockBody, "windowOpacity");
         opacityAnimation->setDuration(configInfo.clockMoveSpeed);
@@ -171,10 +180,10 @@ void TrayMenu::animationShowToHide(const StateConditionGuard &GUARD)
         opacityAnimation->setKeyValueAt(0.5, 1);
         opacityAnimation->setKeyValueAt(1, 0);
         opacityAnimation->start();
-        connect(opacityAnimation, &QPropertyAnimation::finished, [=](){
+        connect(opacityAnimation, &QPropertyAnimation::finished, [=]()
+                {
                     delete opacityAnimation; 
-                    opacityAnimation = nullptr; 
-                });
+                    opacityAnimation = nullptr; });
     }
 }
 
@@ -198,8 +207,7 @@ void TrayMenu::animationHideToShow(const StateConditionGuard &GUARD)
                     logger->info("moveAnimation finished");
                     SetClockBodyCurState(GetClockBodyTargetState());
                     delete moveAnimation;
-                    moveAnimation = nullptr; 
-                });
+                    moveAnimation = nullptr; });
 
         opacityAnimation = new QPropertyAnimation(clockBody, "windowOpacity");
         opacityAnimation->setDuration(configInfo.clockMoveSpeed);
@@ -210,8 +218,7 @@ void TrayMenu::animationHideToShow(const StateConditionGuard &GUARD)
         connect(opacityAnimation, &QPropertyAnimation::finished, [=]()
                 {
                     delete opacityAnimation; 
-                    opacityAnimation = nullptr; 
-                });
+                    opacityAnimation = nullptr; });
     }
 }
 
@@ -255,7 +262,7 @@ void TrayMenu::initConfig()
     connect(settingMenu, &SettingMenu::settingInfoSignal, this, &TrayMenu::settingInfoSlot);
     // 发送信号，将配置信息传递给设置界面
     emit settingInfoSignal({configInfo.isAutoStartSet, configInfo.isAnimationSet, configInfo.clockMoveSpeed, configInfo.clockMoveInterval, configInfo.clockMoveDistance, configInfo.secondList, configInfo.minuteList, configInfo.hourList, configInfo.dayList});
-    
+
     // 检查是否设置了开机自启
     SetAutoStart();
 
@@ -267,9 +274,7 @@ void TrayMenu::initConfig()
 
     // 播放一个时钟消失的动画，表示时钟初始化完成
     animationShowToHide(StateConditionGuard::GUARD_OPEN);
-
 }
-
 
 // ==================== 保存配置 ====================
 void TrayMenu::saveAllConfig()
@@ -322,6 +327,7 @@ void TrayMenu::ClockBodyClicked()
 // ==============================================================
 // 设置槽函数
 // 把设置菜单传来的设置信息保存到配置文件中
+// 重启程序，刷新配置
 // ==============================================================
 void TrayMenu::settingInfoSlot(SettingStruct sets)
 {
@@ -339,6 +345,7 @@ void TrayMenu::settingInfoSlot(SettingStruct sets)
     SetAutoStart();
     SetAnimation();
     initTime();
+    appRestart();
 }
 
 // ==============================================================
@@ -383,7 +390,6 @@ void TrayMenu::SetAnimation()
     }
 }
 
-
 // ==============================================================
 // 初始化时间列表和结束时间列表
 // ==============================================================
@@ -392,93 +398,118 @@ void TrayMenu::initTime()
     logger->info("[initTime] init time");
     if (configInfo.isAnimationSet)
     {
-    timeStringToTimeList(configInfo.secondList, SecondList, 60);
-    timeStringToTimeList(configInfo.minuteList, MinuteList, 60);
-    timeStringToTimeList(configInfo.hourList, HourList, 24);
-    timeStringToTimeList(configInfo.dayList, WeekList, 7);
+        timeStringToTimeList(configInfo.secondList, SecondList, 60);
+        timeStringToTimeList(configInfo.minuteList, MinuteList, 60);
+        timeStringToTimeList(configInfo.hourList, HourList, 24);
+        timeStringToTimeList(configInfo.dayList, WeekList, 7);
 
-    SecondCloseList->clear();
-    MinuteCloseList->clear();
-    HourCloseList->clear();
-    WeekCloseList->clear();
+        SecondCloseList->clear();
+        MinuteCloseList->clear();
+        HourCloseList->clear();
+        WeekCloseList->clear();
 
-    for (auto i = WeekList->begin(); i != WeekList->end(); i++)
-    {
-        for (auto j = HourList->begin(); j != HourList->end(); j++)
+        for (auto i = WeekList->begin(); i != WeekList->end(); i++)
         {
-            for (auto k = MinuteList->begin(); k != MinuteList->end(); k++)
+            for (auto j = HourList->begin(); j != HourList->end(); j++)
             {
-                for (auto l = SecondList->begin(); l != SecondList->end(); l++)
+                for (auto k = MinuteList->begin(); k != MinuteList->end(); k++)
                 {
-                    QString time = *i + " " + *j + ":" + *k + ":" + *l;
-                    logger->info("[initTime] time: " + time.toStdString());
-
-                    if("xx" == *l){
-                        logger->error("[initTime] second is none ");
-                    }else{
-                        int second = (*l).toInt();
-                        int finalSecond = second + configInfo.clockMoveInterval;
-                        if(finalSecond >= 60){
-                            finalSecond = finalSecond % 60;
-                            if("xx" == *k){
-                                logger->debug("[initTime] minute is none, do nothing");
-                            }else{
-                                int minute = (*k).toInt();
-                                int finalMinute = minute + 1;
-                                if(finalMinute >= 60){
-                                    finalMinute = finalMinute % 60;
-                                    if("xx" == *j){
-                                        logger->debug("[initTime] hour is none, do nothing");
-                                    }else{
-                                        int hour = (*j).toInt();
-                                        int finalHour = hour + 1;
-                                        if(finalHour >= 24){
-                                            finalHour = finalHour % 24;
-                                            if("xx" == *i){
-                                                logger->debug("[initTime] day is none, do nothing");
-                                            }else{
-                                                int day = (*i).toInt();
-                                                int finalDay = day + 1;
-                                                if(finalDay >= 7){
-                                                    finalDay = finalDay - 7;
+                    for (auto l = SecondList->begin(); l != SecondList->end(); l++)
+                    {
+                        QString time = *i + " " + *j + ":" + *k + ":" + *l;
+                        logger->info("[initTime] time: " + time.toStdString());
+                        int finalSecond = -1;
+                        int finalMinute = -1;
+                        int finalHour = -1;
+                        int finalDay = -1;
+                        if ("xx" == *l)
+                        {
+                            logger->error("[initTime] second is none ");
+                        }
+                        else
+                        {
+                            int second = (*l).toInt();
+                            finalSecond = second + configInfo.clockMoveInterval;
+                            if (finalSecond >= 60)
+                            {
+                                finalSecond = finalSecond % 60;
+                                if ("xx" == *k)
+                                {
+                                    logger->debug("[initTime] minute is none, do nothing");
+                                }
+                                else
+                                {
+                                    int minute = (*k).toInt();
+                                    finalMinute = minute + 1;
+                                    if (finalMinute >= 60)
+                                    {
+                                        finalMinute = finalMinute % 60;
+                                        if ("xx" == *j)
+                                        {
+                                            logger->debug("[initTime] hour is none, do nothing");
+                                        }
+                                        else
+                                        {
+                                            int hour = (*j).toInt();
+                                            finalHour = hour + 1;
+                                            if (finalHour >= 24)
+                                            {
+                                                finalHour = finalHour % 24;
+                                                if ("xx" == *i)
+                                                {
+                                                    logger->debug("[initTime] day is none, do nothing");
                                                 }
-                                                QString finalTime = findWeekDayName(finalDay) + " " + QString::number(finalHour) + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
-                                                logger->info("[initTime] finalTime: " + finalTime.toStdString());
-                                                SecondCloseList->append(QString::number(finalSecond));
-                                                MinuteCloseList->append(QString::number(finalMinute));
-                                                HourCloseList->append(QString::number(finalHour));
-                                                WeekCloseList->append(findWeekDayName(finalDay));
+                                                else
+                                                {
+                                                    int day = (*i).toInt();
+                                                    finalDay = day + 1;
+                                                    if (finalDay >= 7)
+                                                    {
+                                                        finalDay = finalDay - 7;
+                                                    }
+                                                    QString finalTime = findWeekDayName(finalDay) + " " + (finalHour < 10 ? ("0" + QString::number(finalHour)) : QString::number(finalHour)) + ":" + (finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)) + ":" + (finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond));
+                                                    logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                                    SecondCloseList->append((finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond)));
+                                                    MinuteCloseList->append((finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)));
+                                                    HourCloseList->append((finalHour < 10 ? ("0" + QString::number(finalHour)) : QString::number(finalHour)));
+                                                    WeekCloseList->append(findWeekDayName(finalDay));
+                                                }
                                             }
-                                        }else{
-                                            QString finalTime = *i + " " + QString::number(finalHour) + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
-                                            logger->info("[initTime] finalTime: " + finalTime.toStdString());
-                                            SecondCloseList->append(QString::number(finalSecond));
-                                            MinuteCloseList->append(QString::number(finalMinute));
-                                            HourCloseList->append(QString::number(finalHour));
-                                            WeekCloseList->append(*i);
+                                            else
+                                            {
+                                                QString finalTime = *i + " " + (finalHour < 10 ? ("0" + QString::number(finalHour)) : QString::number(finalHour)) + ":" + (finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)) + ":" + (finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond));
+                                                logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                                SecondCloseList->append((finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond)));
+                                                MinuteCloseList->append((finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)));
+                                                HourCloseList->append((finalHour < 10 ? ("0" + QString::number(finalHour)) : QString::number(finalHour)));
+                                                WeekCloseList->append(*i);
+                                            }
                                         }
                                     }
-                                }else{
-                                    QString finalTime = *i + " " + *j + ":" + QString::number(finalMinute) + ":" + QString::number(finalSecond);
-                                    logger->info("[initTime] finalTime: " + finalTime.toStdString());
-                                    SecondCloseList->append(QString::number(finalSecond));
-                                    MinuteCloseList->append(QString::number(finalMinute));
-                                    HourCloseList->append(*j);
+                                    else
+                                    {
+                                        QString finalTime = *i + " " + *j + ":" + (finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)) + ":" + (finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond));
+                                        logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                        SecondCloseList->append((finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond)));
+                                        MinuteCloseList->append((finalMinute < 10 ? ("0" + QString::number(finalMinute)) : QString::number(finalMinute)));
+                                        HourCloseList->append(*j);
+                                    }
                                 }
                             }
-                        }else{
-                            QString finalTime = *i + " " + *j + ":" + *k + ":" + QString::number(finalSecond);
-                            logger->info("[initTime] finalTime: " + finalTime.toStdString());
-                            SecondCloseList->append(QString::number(finalSecond));
-                            MinuteCloseList->append(*k);
-                            HourCloseList->append(*j);
-                            WeekCloseList->append(*i);
+                            else
+                            {
+                                QString finalTime = *i + " " + *j + ":" + *k + ":" + (finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond));
+                                logger->info("[initTime] finalTime: " + finalTime.toStdString());
+                                SecondCloseList->append((finalSecond < 10 ? ("0" + QString::number(finalSecond)) : QString::number(finalSecond)));
+                                MinuteCloseList->append(*k);
+                                HourCloseList->append(*j);
+                                WeekCloseList->append(*i);
+                            }
                         }
                     }
                 }
             }
         }
-    }
     }
 }
 
@@ -489,11 +520,11 @@ void TrayMenu::initTime()
 void TrayMenu::timeStringToTimeList(QString timeString, QList<QString> *timeList, const int &maxNum)
 {
     timeList->clear();
-    if (timeString.isEmpty())   // 如果时间字符串为空，则初始化时间列表为默认值 xx, 且不重复保存
+    if (timeString.isEmpty()) // 如果时间字符串为空，则初始化时间列表为默认值 xx, 且不重复保存
     {
         for (size_t i = 0; i < maxNum; i++)
         {
-            if (7 == maxNum)  // 如果是星期列表，则将数字转换为星期名称
+            if (7 == maxNum) // 如果是星期列表，则将数字转换为星期名称
             {
                 timeList->append(findWeekDayName(i));
             }
@@ -509,7 +540,7 @@ void TrayMenu::timeStringToTimeList(QString timeString, QList<QString> *timeList
         QStringList timeListString = timeString.split(" ");
         for (auto i = timeListString.begin(); i != timeListString.end(); i++)
         {
-            if (7 == maxNum)    
+            if (7 == maxNum)
             {
                 timeList->append(findWeekDayName((*i).toInt()));
             }
@@ -528,6 +559,7 @@ void TrayMenu::CheckTimeToCtrlClock()
 {
     if (configInfo.isAnimationSet)
     {
+        logger->debug("show Curstate = {}", GetClockBodyCurState());
         QDateTime current_date_time = QDateTime::currentDateTime();
         int curtime = current_date_time.toSecsSinceEpoch();
         QString current_week = current_date_time.toString("dddd");
@@ -535,7 +567,7 @@ void TrayMenu::CheckTimeToCtrlClock()
         QString current_minute = current_date_time.toString("mm");
         QString current_second = current_date_time.toString("ss");
 
-        if(GetClockBodyCurState() == ClockBodyState::CLOCKBODY_HIDE)
+        if (GetClockBodyCurState() == ClockBodyState::CLOCKBODY_HIDE || GetClockBodyCurState() == ClockBodyState::CLOCKBODY_MOVE_TO_HIDE)
         {
             for (auto k = WeekList->begin(); k != WeekList->end(); k++)
             {
@@ -567,7 +599,7 @@ void TrayMenu::CheckTimeToCtrlClock()
                 }
             }
         }
-        if(GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW)
+        if (GetClockBodyCurState() == ClockBodyState::CLOCKBODY_SHOW || GetClockBodyCurState() == ClockBodyState::CLOCKBODY_MOVE_TO_SHOW)
         {
             for (auto k = WeekCloseList->begin(); k != WeekCloseList->end(); k++)
             {
@@ -600,7 +632,6 @@ void TrayMenu::CheckTimeToCtrlClock()
         }
     }
 }
-
 
 void TrayMenu::SetClockBodyCurState(const ClockBodyState &state)
 {

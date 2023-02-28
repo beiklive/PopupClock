@@ -52,13 +52,14 @@ signals:
     void mousePressSignal();
 
 private:
-    int tClockBodyWidth = 280;
-    int tClockBodyHeight = 90;
-    int tClockDialWidth = 60;
+    int mSizeStep = 10;
+    int tClockBodyWidth = 28 * mSizeStep;
+    int tClockBodyHeight = 9 * mSizeStep;
+    int tClockDialWidth = 6 * mSizeStep;
     int tClockDialHeight = tClockDialWidth;
     int tClockDialPositionY = (tClockBodyHeight - tClockDialHeight) / 2;
-    int tClockDialPositionX = 10;
-    int tClockNumberWidth = 190;
+    int tClockDialPositionX = 1 * mSizeStep;
+    int tClockNumberWidth = 19 * mSizeStep;
     int tClockNumberHeight = tClockDialHeight;
     int tClockNumberPositionX = (tClockBodyWidth - tClockNumberWidth - tClockDialPositionX - tClockDialWidth) / 2 + tClockDialPositionX + tClockDialWidth;
     int tClockNumberPositionY = tClockDialPositionY;

@@ -19,6 +19,7 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QTimer>
+#include <QProcess>
 #include <QMouseEvent>
 #include <QLCDNumber>
 #include <QPainterPath>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>240</width>
-    <height>400</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>240</width>
-    <height>400</height>
+    <height>500</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>240</width>
-    <height>400</height>
+    <width>251</width>
+    <height>500</height>
    </size>
   </property>
   <property name="font">
@@ -45,20 +45,24 @@
        <property name="title">
         <string/>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QCheckBox" name="autoStartSet">
-          <property name="text">
-           <string>开机自启动</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="isAinmationSet">
-          <property name="text">
-           <string>动画效果</string>
-          </property>
-         </widget>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QCheckBox" name="autoStartSet">
+            <property name="text">
+             <string>开机自启动</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="isAinmationSet">
+            <property name="text">
+             <string>动画效果</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -227,8 +231,8 @@
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>42</x>
-     <y>95</y>
+     <x>52</x>
+     <y>247</y>
     </hint>
    </hints>
   </connection>
