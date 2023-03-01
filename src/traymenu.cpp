@@ -443,7 +443,7 @@ void TrayMenu::initTime()
                                     finalMinute = minute + 1;
                                     if (finalMinute >= 60)
                                     {
-                                        finalMinute = finalMinute % 60;
+                                        finalMinute = 0;
                                         if ("xx" == *j)
                                         {
                                             logger->debug("[initTime] hour is none, do nothing");
@@ -454,7 +454,7 @@ void TrayMenu::initTime()
                                             finalHour = hour + 1;
                                             if (finalHour >= 24)
                                             {
-                                                finalHour = finalHour % 24;
+                                                finalHour = 0;
                                                 if ("xx" == *i)
                                                 {
                                                     logger->debug("[initTime] day is none, do nothing");
