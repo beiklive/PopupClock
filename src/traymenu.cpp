@@ -528,7 +528,7 @@ void TrayMenu::CheckTimeToCtrlClock()
             for (auto k = WeekList->begin(); k != WeekList->end(); k++)
             {
                 logger->debug("current_week = {}, find = {}", current_week.toStdString(), findWeekDayName((*k).toInt()).toStdString());
-                if (current_week == findWeekDayName((findWeekDayName((*k).toInt())).toInt()))
+                if (current_week == findWeekDayName((*k).toInt()))
                 {
                     for (auto j = HourList->begin(); j != HourList->end(); j++)
                     {
@@ -559,7 +559,7 @@ void TrayMenu::CheckTimeToCtrlClock()
         {
             for (auto k = WeekCloseList->begin(); k != WeekCloseList->end(); k++)
             {
-                if (current_week == findWeekDayName((findWeekDayName((*k).toInt())).toInt()))
+                if (current_week == findWeekDayName((*k).toInt()))
                 {
                     for (auto j = HourCloseList->begin(); j != HourCloseList->end(); j++)
                     {
