@@ -95,7 +95,7 @@ private:
     SettingMenu *settingMenu;
     ClockBody *clockBody;
     ConfigStruct configInfo{
-        30, 70, false, false, 1500, 60, 350, "", "", "", ""
+        30, 70, 3, false, false, 1500, 60, 350, "", "", "", ""
     };
     ClockBodyState clockBodyState = CLOCKBODY_SHOW;
     ClockBodyStateStruct m_clockBodyStateMachine{

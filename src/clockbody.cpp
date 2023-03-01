@@ -22,7 +22,7 @@ void ClockBody::initWidget()
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Tool | Qt::WindowStaysOnTopHint | Qt::ToolTip);
     this->setAttribute(Qt::WA_TranslucentBackground);
 
-    lcd->setGeometry(clockNumberInfo.positionX + 20, clockNumberInfo.positionY + 10, clockNumberInfo.width - 40, clockNumberInfo.height - 20);
+    lcd->setGeometry(tClockNumberFontPosX, tClockNumberFontPosY, tClockNumberFontWidth, tClockNumberFontHeight);
     lcd->setDigitCount(8);
     lcd->setFrameStyle(QFrame::NoFrame);
     lcd->setSegmentStyle(QLCDNumber::Flat);
@@ -170,6 +170,8 @@ void ClockBody::drawCentre(QPainter *painter)
     painter->drawEllipse(-5, -5, 10, 10);
 }
 
+
+
 void ClockBody::drawClockNumber(const QTime &time)
 {
     // 创建缓冲区
@@ -196,4 +198,40 @@ void ClockBody::drawClockNumber(const QTime &time)
 
 
     lcd->display(time.toString("hh:mm:ss"));
+}
+void ClockBody::initLayout(int value){
+    mSizeStep = value;
+    gap = 3 * value;
+    fontGapX = 6.5 * value;
+    fontGapY = 4 * value;
+
+    clockDialInfo.height = 20 * value;
+    clockDialInfo.width = clockDialInfo.height;
+
+    clockNumberInfo.width = (19 / 6.0) * clockDialInfo.height;
+    clockNumberInfo.height = clockDialInfo.height;
+
+    clockBodyInfo.width = 3 * gap + clockDialInfo.width + clockNumberInfo.width;
+    clockBodyInfo.height = 2 * gap + clockDialInfo.height;
+    clockBodyInfo.borderRadius = 6 * value;
+
+    clockDialInfo.positionX = gap;
+    clockDialInfo.positionY = gap;
+    clockNumberInfo.positionX = 2 * gap + clockDialInfo.width;
+    clockNumberInfo.positionY = gap;
+    clockNumberInfo.borderRadius = 6 * value;
+
+    tClockNumberFontPosX = clockNumberInfo.positionX + fontGapX;
+    tClockNumberFontPosY = clockNumberInfo.positionY + fontGapY;
+    tClockNumberFontWidth = clockNumberInfo.width - fontGapX * 2;
+    tClockNumberFontHeight = clockNumberInfo.height - fontGapY * 2;
+    this->setFixedSize(clockBodyInfo.width, clockBodyInfo.height);
+    lcd->setGeometry(tClockNumberFontPosX, tClockNumberFontPosY, tClockNumberFontWidth, tClockNumberFontHeight);
+
+
+}
+void ClockBody::bodySizeSlot(int value)
+{ 
+    initLayout(value);
+    update();
 }

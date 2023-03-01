@@ -36,6 +36,7 @@ void SettingMenu::SetUiToSettingStruct()
     settingInfo.minuteList = ui->minuteWidget->text();
     settingInfo.hourList = ui->hourWidget->text();
     settingInfo.dayList = ui->dayWidget->text();
+    settingInfo.size = ui->horizontalSlider->value();
 }
 
 void SettingMenu::SetSettingStructToUi(const SettingStruct& sets)
@@ -49,7 +50,7 @@ void SettingMenu::SetSettingStructToUi(const SettingStruct& sets)
     ui->minuteWidget->setText(sets.minuteList);
     ui->hourWidget->setText(sets.hourList);
     ui->dayWidget->setText(sets.dayList);
-
+    ui->horizontalSlider->setValue(sets.size);
     ui->groupBox_2->setEnabled(sets.isAnimationSet);
 }
 
@@ -76,3 +77,16 @@ void SettingMenu::setSettingStructSlot(SettingStruct sets)
     SetSettingStructToUi(sets);
     settingInfo = sets;
 }
+void SettingMenu::on_horizontalSlider_valueChanged(int value)
+{
+    emit clockSizeSignal(value);
+
+}
+
+
+void SettingMenu::on_horizontalSlider_sliderReleased()
+{
+    Config.SetValue("size", std::to_string(ui->horizontalSlider->value()));
+    Config.SaveConfig();
+}
+

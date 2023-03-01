@@ -3,6 +3,7 @@
 
 #include "common.h"
 extern std::shared_ptr<spdlog::logger> logger;
+extern ConfigManager& Config;
 namespace
 {
     const QPoint hourHand[4] = {
@@ -30,6 +31,7 @@ public:
     ~ClockBody();
 
     void initWidget();
+    void initLayout(int value);
     void drawClockBody(const QTime& time);
     void drawClockDial(const QTime& time);
     void drawClockNumber(const QTime& time);
@@ -47,48 +49,44 @@ protected:
     void drawBackgroud(QPainter *painter);
     void drawCentre(QPainter *painter);
 
+public slots:
+    void bodySizeSlot(int value);
 signals:
     void mouseReleaseSignal(QPoint pos);
     void mousePressSignal();
 
 private:
-    int mSizeStep = 10;
-    int tClockBodyWidth = 28 * mSizeStep;
-    int tClockBodyHeight = 9 * mSizeStep;
-    int tClockDialWidth = 6 * mSizeStep;
-    int tClockDialHeight = tClockDialWidth;
-    int tClockDialPositionY = (tClockBodyHeight - tClockDialHeight) / 2;
-    int tClockDialPositionX = 1 * mSizeStep;
-    int tClockNumberWidth = 19 * mSizeStep;
-    int tClockNumberHeight = tClockDialHeight;
-    int tClockNumberPositionX = (tClockBodyWidth - tClockNumberWidth - tClockDialPositionX - tClockDialWidth) / 2 + tClockDialPositionX + tClockDialWidth;
-    int tClockNumberPositionY = tClockDialPositionY;
-
-
+    int mSizeStep = 3;
+    int gap = 8;
+    int fontGapX = 8;
+    int fontGapY = 8;
+    int tClockNumberFontPosX;
+    int tClockNumberFontPosY;
+    int tClockNumberFontWidth;
+    int tClockNumberFontHeight;
     ClockBodyStruct clockBodyInfo{
-        tClockBodyWidth,
-        tClockBodyHeight,
+        80,
+        80,
         QColor(189, 189, 189),
-        18};
+        80};
     ClockDialStruct clockDialInfo{
-        tClockDialWidth,
-        tClockDialHeight,
+        80,
+        80,
         QColor(230, 230, 230),
         Qt::red,
         Qt::black,
         Qt::black,
-        tClockDialPositionX,
-        tClockDialPositionY
+        80,
+        80
     };
     ClockNumberStruct clockNumberInfo{
-        tClockNumberWidth,
-        tClockNumberHeight,
+        80,
+        80,
         QColor(230, 230, 230),
-        18,
-        tClockNumberPositionX,
-        tClockNumberPositionY
+        80,
+        80,
+        80
     };
-
     QPoint dragPosition;
     QLCDNumber *lcd = new QLCDNumber(this);
 };

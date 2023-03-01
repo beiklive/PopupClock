@@ -3,6 +3,7 @@
 
 #include "common.h"
 extern std::shared_ptr<spdlog::logger> logger;
+extern ConfigManager& Config;
 
 namespace Ui {
 class SettingMenu;
@@ -30,15 +31,20 @@ private slots:
     void on_buttonBox_accepted();
     void on_buttonBox_rejected();
 
+    void on_horizontalSlider_valueChanged(int value);
+
+    void on_horizontalSlider_sliderReleased();
+
 signals:
     void settingInfoSignal(SettingStruct sets);
-
+    void clockSizeSignal(int action);
 private:
     Ui::SettingMenu *ui;
 
     SettingStruct settingInfo{
         false,
         false,
+        3,
         0,
         0,
         0,

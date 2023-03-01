@@ -74,6 +74,7 @@ struct ConfigStruct
 {
     int positionX;
     int positionY;
+    int size;
     bool isAutoStartSet;
     bool isAnimationSet;
     int clockMoveSpeed;
@@ -108,6 +109,7 @@ struct SettingStruct
 {
     bool isAutoStartSet;
     bool isAnimationSet;
+    int size;
     int clockMoveSpeed;
     int clockMoveInterval;
     int clockMoveDistance;
